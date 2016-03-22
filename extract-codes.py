@@ -16,7 +16,10 @@ SUBMIT_DATA = {'fi': 'Ορέστης'.encode(ENCODING), 'fa': 'Φλώρος-Μα
 BASE_URL = r'http://ithaki.eng.auth.gr/netlab/'
 LOGIN_URL = r'http://ithaki.eng.auth.gr/netlab/vlabStart.php'
 TEXT_FOR_CODES_LINK = r'Δικτυακός προγραμματισμός : Java network socket programming (8ο εξάμηνο)'
-CODES_URL_FORMAT = r'http://ithaki.eng.auth.gr/netlab/vlabProject.php?session={session}&x=2&fi=%CF%F1%DD%F3%F4%E7%F2&fa=%D6%EB%FE%F1%EF%F2-%CC%E1%EB%E9%E2%DF%F4%F3%E7%F2&am=7796'
+CODES_URL_FORMAT = (
+    r'http://ithaki.eng.auth.gr/netlab/vlabProject.php?session={session}&x=2&fi=%CF%F1%DD%F3%F4%E7%F2&fa=%D6%EB%FE%F1%E'
+    r'F%F2-%CC%E1%EB%E9%E2%DF%F4%F3%E7%F2&am=7796'
+)
 
 
 def remove_extra_whitespace(text):
