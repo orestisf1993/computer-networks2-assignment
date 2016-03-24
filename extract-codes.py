@@ -12,13 +12,16 @@ import requests
 from bs4 import BeautifulSoup
 
 ENCODING = 'ISO-8859-7'
-SUBMIT_DATA = {'fi': 'Ορέστης'.encode(ENCODING), 'fa': 'Φλώρος-Μαλιβίτσης'.encode(ENCODING), 'am': '7796', 'x': 1}
+NAME_ENCODED = 'Ορέστης'.encode(ENCODING)
+LAST_NAME_ENCODED = 'Φλώρος-Μαλιβίτσης'.encode(ENCODING)
+AEM = '7796'
+SUBMIT_DATA = {'fi': NAME_ENCODED, 'fa': LAST_NAME_ENCODED, 'am': AEM, 'x': 1}
 BASE_URL = r'http://ithaki.eng.auth.gr/netlab/'
 LOGIN_URL = r'http://ithaki.eng.auth.gr/netlab/vlabStart.php'
 TEXT_FOR_CODES_LINK = r'Δικτυακός προγραμματισμός : Java network socket programming (8ο εξάμηνο)'
 CODES_URL_FORMAT = (
-    r'http://ithaki.eng.auth.gr/netlab/vlabProject.php?session={session}&x=2&fi=%CF%F1%DD%F3%F4%E7%F2&fa=%D6%EB%FE%F1%E'
-    r'F%F2-%CC%E1%EB%E9%E2%DF%F4%F3%E7%F2&am=7796'
+    r'http://ithaki.eng.auth.gr/netlab/vlabProject.php?'
+    r'session={session}&x=2&fi={name}&fa={last_name}&am=7796'
 )
 
 
@@ -37,7 +40,11 @@ def main():
         login_response.encoding = ENCODING
 
         session_id = get_session_id(login_response.text)
-        codes_url = CODES_URL_FORMAT.format(session=session_id)
+        codes_url = CODES_URL_FORMAT.format(
+            session=session_id,
+            name=urlparse.quote(NAME_ENCODED),
+            last_name=urlparse.quote(LAST_NAME_ENCODED)
+        )
         codes_response = session.get(codes_url)
         codes_response.encoding = ENCODING
         codes_soup = BeautifulSoup(codes_response.text, "html.parser")
