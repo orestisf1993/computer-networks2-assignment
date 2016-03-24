@@ -5,8 +5,20 @@ import com.google.gson.stream.JsonReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.logging.*;
 
 public class userApplication {
+    final static Level loggerLevel = Level.ALL;
+    private final static Logger logger = Logger.getLogger(userApplication.class.getName());
+
+    static {
+        // http://stackoverflow.com/questions/6315699/why-are-the-level-fine-logging-messages-not-showing
+        Handler consoleHandler = new ConsoleHandler();
+        consoleHandler.setLevel(loggerLevel);
+        logger.addHandler(consoleHandler);
+        logger.setLevel(loggerLevel);
+    }
+
 
     public static void main(final String[] args) throws IOException {
         MainInstance app = new MainInstance();
@@ -14,7 +26,8 @@ public class userApplication {
     }
 
     private static class MainInstance {
-        final String jsonFileName = "codes.json";
+        final String JSON_FILE_NAME = "codes.json";
+        final String SERVER_ADDRESS = "155.207.18.208";
 
         String clientPublicAddress;
         int clientListeningPort;
@@ -26,14 +39,15 @@ public class userApplication {
         MainInstance() {}
 
         void printInitMessage() {
-            System.out.println("Using configuration:");
-            System.out.println("client address: " + clientPublicAddress + " at port: " + clientListeningPort);
-            System.out.println("Server port: " + serverListeningPort);
-            System.out.println("Codes:");
-            System.out.println("echo: " + echoRequestCode + " image: " + imageRequestCode + " sound: " + soundRequestCode);
+            logger.info("Using configuration:\n" +
+                    "Client address: " + clientPublicAddress + " at port: " + clientListeningPort + "\n" +
+                    "Server address: " + SERVER_ADDRESS + " at port: " + serverListeningPort + "\n" +
+                    "Codes:" + "\n" +
+                    "echo: " + echoRequestCode + " image: " + imageRequestCode + " sound: " + soundRequestCode);
         }
 
-        public void run(final String[] args) throws IOException {
+        void run(final String[] args) throws IOException {
+            logger.fine("Starting execution.");
             initVariables();
             printInitMessage();
         }
