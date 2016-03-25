@@ -103,6 +103,7 @@ public class userApplication {
                 try {
                     client.receive(imagePacket);
                 } catch (final SocketTimeoutException exception) {
+                    // Since we got a timeout, we have to check if the termination sequence is that of an image.
                     final byte[] finalImageBytes = stream.toByteArray();
                     final byte[] terminatingSequence = Arrays.copyOfRange(finalImageBytes, finalImageBytes.length - 2, finalImageBytes.length);
                     final byte[] expectedTerminatingSequence = new byte[]{(byte) 0xff, (byte) 0xd9};
@@ -120,10 +121,8 @@ public class userApplication {
                     }
                 }
                 final int packetLength = imagePacket.getLength();
-                logger.finest("Received image packet of length:" + packetLength + ".");
-                final byte[] printBuffer = packetLength < maxLength ? Arrays.copyOfRange(imageBuffer, 0, packetLength) : imageBuffer;
-                System.out.println(printHexBinary(printBuffer));
-                stream.write(printBuffer, 0, packetLength);
+                logger.finest(filename + ": Received image packet of length:" + packetLength + ".");
+                stream.write(imageBuffer, 0, packetLength);
                 if (packetLength < maxLength) {
                     break;
                 }
@@ -132,6 +131,7 @@ public class userApplication {
                 }
             }
             final FileOutputStream out = new FileOutputStream(filename);
+            logger.info("Image download finished, saving to " + filename + ".");
             out.write(stream.toByteArray());
             out.close();
             stream.close();
