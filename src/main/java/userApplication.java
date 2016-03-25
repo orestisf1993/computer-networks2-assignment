@@ -138,8 +138,12 @@ public class userApplication {
                     simpleSend("NEXT");
                 }
             }
+            saveStreamToFile(stream, filename);
+        }
+
+        void saveStreamToFile(final ByteArrayOutputStream stream, final String filename) throws IOException {
             final FileOutputStream out = new FileOutputStream(filename);
-            logger.info("Image download finished, saving to " + filename + ".");
+            logger.info("Download finished, saving stream to " + filename + ".");
             out.write(stream.toByteArray());
             out.close();
             stream.close();
