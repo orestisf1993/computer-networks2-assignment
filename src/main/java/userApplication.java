@@ -71,11 +71,75 @@ public class userApplication {
 
         void run(final String[] args) throws IOException {
             logger.info("Starting execution.");
+
+            logger.info("Starting image downloads.");
+            downloadImage("test1.jpg");
+            downloadImage("test2.jpg", 512);
+            downloadImage("test3.jpg", 512, true);
+        }
+
+        void downloadImage(final String filename) throws IOException {
+            // 128 is default (L=128). Supported are: 128,256,512,1024.
+            downloadImage(filename, 128, false);
+        }
+
+        void downloadImage(final String filename, final int maxLength) throws IOException {
+            downloadImage(filename, maxLength, false);
+        }
+
+        void simpleSend(final String message) throws IOException {
+            final byte[] buffer = message.getBytes();
+            final DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+            server.send(packet);
+        }
+
+        void downloadImage(final String filename, final int maxLength, final boolean flow) throws IOException {
+            final byte[] imageBuffer = new byte[maxLength];
+            final DatagramPacket imagePacket = new DatagramPacket(imageBuffer, imageBuffer.length);
+            final String imageCommand = "image_request_code" + imageRequestCode + (flow ? "FLOW=ON" : "") + "UDP=" + maxLength;
+            simpleSend(imageCommand);
+            final ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            while (true) {
+                try {
+                    client.receive(imagePacket);
+                } catch (final SocketTimeoutException exception) {
+                    final byte[] finalImageBytes = stream.toByteArray();
+                    final byte[] terminatingSequence = Arrays.copyOfRange(finalImageBytes, finalImageBytes.length - 2, finalImageBytes.length);
+                    final byte[] expectedTerminatingSequence = new byte[]{(byte) 0xff, (byte) 0xd9};
+                    final String baseLogMessage = "Image download stopped by timeout.";
+                    if (Arrays.equals(terminatingSequence, expectedTerminatingSequence)) {
+                        logger.info(baseLogMessage);
+                        break;
+                    } else {
+                        logger.warning(baseLogMessage
+                                + " Last bytes aren't those that terminate a .jpg image. No image will be saved.\n"
+                                + "Expected: " + printHexBinary(expectedTerminatingSequence) + "\n"
+                                + "Got: " + printHexBinary(terminatingSequence));
+                        stream.close();
+                        return;
+                    }
+                }
+                final int packetLength = imagePacket.getLength();
+                logger.finest("Received image packet of length:" + packetLength + ".");
+                final byte[] printBuffer = packetLength < maxLength ? Arrays.copyOfRange(imageBuffer, 0, packetLength) : imageBuffer;
+                System.out.println(printHexBinary(printBuffer));
+                stream.write(printBuffer, 0, packetLength);
+                if (packetLength < maxLength) {
+                    break;
+                }
+                if (flow) {
+                    simpleSend("NEXT");
+                }
+            }
+            final FileOutputStream out = new FileOutputStream(filename);
+            out.write(stream.toByteArray());
+            out.close();
+            stream.close();
         }
 
         void initVariables() throws FileNotFoundException {
-            JsonReader reader = new JsonReader(new FileReader(jsonFileName));
-            JsonObject json = new Gson().fromJson(reader, JsonObject.class);
+            final JsonReader reader = new JsonReader(new FileReader(JSON_FILE_NAME));
+            final JsonObject json = new Gson().fromJson(reader, JsonObject.class);
 
             clientPublicAddress = json.get("clientPublicAddress").getAsString();
             clientListeningPort = json.get("clientListeningPort").getAsInt();
