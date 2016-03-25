@@ -77,18 +77,8 @@ public class userApplication {
             logger.info("Starting execution.");
 
             logger.info("Starting image downloads.");
-            downloadImage("test1.jpg");
-            downloadImage("test2.jpg", 512);
-            downloadImage("test3.jpg", 512, true);
-        }
-
-        void downloadImage(final String filename) throws IOException {
-            // 128 is default (L=128). Supported are: 128,256,512,1024.
-            downloadImage(filename, 128, false);
-        }
-
-        void downloadImage(final String filename, final int maxLength) throws IOException {
-            downloadImage(filename, maxLength, false);
+            downloadImage("test2.jpg", 512, false, "PTZ");
+            downloadImage("test3.jpg", 1024, true);
         }
 
         void simpleSend(final String message) throws IOException {
@@ -97,10 +87,23 @@ public class userApplication {
             server.send(packet);
         }
 
+        void downloadImage(final String filename) throws IOException {
+            // 128 is default (L=128). Supported are: 128,256,512,1024.
+            downloadImage(filename, 128);
+        }
+
+        void downloadImage(final String filename, final int maxLength) throws IOException {
+            downloadImage(filename, maxLength, false);
+        }
+
         void downloadImage(final String filename, final int maxLength, final boolean flow) throws IOException {
+            downloadImage(filename, maxLength, flow, "FIX");
+        }
+
+        void downloadImage(final String filename, final int maxLength, final boolean flow, final String camera) throws IOException {
             final byte[] imageBuffer = new byte[maxLength];
             final DatagramPacket imagePacket = new DatagramPacket(imageBuffer, imageBuffer.length);
-            final String imageCommand = "image_request_code" + imageRequestCode + (flow ? "FLOW=ON" : "") + "UDP=" + maxLength;
+            final String imageCommand = "image_request_code" + imageRequestCode + (flow ? "FLOW=ON" : "") + "UDP=" + maxLength + "CAM=" + camera;
             simpleSend(imageCommand);
             final ByteArrayOutputStream stream = new ByteArrayOutputStream();
             while (true) {
