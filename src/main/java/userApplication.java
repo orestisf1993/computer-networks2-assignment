@@ -104,7 +104,7 @@ public class userApplication {
         void downloadImage(final String filename, final int maxLength, final boolean flow, final String camera) throws IOException {
             final byte[] imageBuffer = new byte[maxLength];
             final DatagramPacket imagePacket = new DatagramPacket(imageBuffer, imageBuffer.length);
-            final String imageCommand = "image_request_code" + imageRequestCode + (flow ? "FLOW=ON" : "") + "UDP=" + maxLength + "CAM=" + camera;
+            final String imageCommand = imageRequestCode + (flow ? "FLOW=ON" : "") + "UDP=" + maxLength + "CAM=" + camera;
             simpleSend(imageCommand);
             final ByteArrayOutputStream stream = new ByteArrayOutputStream();
             while (true) {
