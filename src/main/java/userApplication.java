@@ -60,8 +60,9 @@ public class userApplication {
 
             final InetAddress address = InetAddress.getByName(SERVER_ADDRESS);
             client = new DatagramSocket(clientListeningPort);
+            client.setSoTimeout(2000);
             server = new DatagramSocket();
-            server.setSoTimeout(1000);
+            server.setSoTimeout(2000);
             server.connect(address, serverListeningPort);
         }
 
