@@ -2,10 +2,15 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonReader;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.logging.*;
+import java.io.*;
+import java.net.*;
+import java.util.Arrays;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static javax.xml.bind.DatatypeConverter.printHexBinary;
 
 public class userApplication {
     final static Level loggerLevel = Level.ALL;
@@ -28,8 +33,9 @@ public class userApplication {
 
     private static class MainInstance {
         final String JSON_FILE_NAME = "codes.json";
-        final String SERVER_ADDRESS = "155.207.18.208";
-
+        final String SERVER_ADDRESS = "155.207.18.208";  // ithaki's address.
+        final DatagramSocket server;
+        final DatagramSocket client;
         String clientPublicAddress;
         int clientListeningPort;
         int serverListeningPort;
@@ -37,7 +43,23 @@ public class userApplication {
         String imageRequestCode;
         String soundRequestCode;
 
-        MainInstance() {}
+        /**
+         * Initialize the connection with the server at ithaki.
+         *
+         * @throws SocketException
+         * @throws FileNotFoundException
+         * @throws UnknownHostException
+         */
+        MainInstance() throws SocketException, FileNotFoundException, UnknownHostException {
+            initVariables();
+            printInitMessage();
+
+            final InetAddress address = InetAddress.getByName(SERVER_ADDRESS);
+            client = new DatagramSocket(clientListeningPort);
+            server = new DatagramSocket();
+            server.setSoTimeout(1000);
+            server.connect(address, serverListeningPort);
+        }
 
         void printInitMessage() {
             logger.info("Using configuration:\n" +
@@ -48,9 +70,7 @@ public class userApplication {
         }
 
         void run(final String[] args) throws IOException {
-            logger.fine("Starting execution.");
-            initVariables();
-            printInitMessage();
+            logger.info("Starting execution.");
         }
 
         void initVariables() throws FileNotFoundException {
