@@ -13,15 +13,16 @@ public class userApplication {
 
     static {
         // http://stackoverflow.com/questions/6315699/why-are-the-level-fine-logging-messages-not-showing
-        Handler consoleHandler = new ConsoleHandler();
+        final Handler consoleHandler = new ConsoleHandler();
         consoleHandler.setLevel(loggerLevel);
+        logger.setUseParentHandlers(false);
         logger.addHandler(consoleHandler);
         logger.setLevel(loggerLevel);
     }
 
 
     public static void main(final String[] args) throws IOException {
-        MainInstance app = new MainInstance();
+        final MainInstance app = new MainInstance();
         app.run(args);
     }
 
