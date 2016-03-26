@@ -20,8 +20,8 @@ import java.util.logging.Logger;
 
 import static javax.xml.bind.DatatypeConverter.printHexBinary;
 
-public class userApplication {
-    final static Level loggerLevel = Level.ALL;
+class userApplication {
+    private final static Level loggerLevel = Level.ALL;
     private final static Logger logger = Logger.getLogger(userApplication.class.getName());
 
     static {
@@ -50,7 +50,7 @@ public class userApplication {
         String echoRequestCode;
         String imageRequestCode;
         String soundRequestCode;
-        Decoder dcpmDecoder = new Decoder() {
+        final Decoder dcpmDecoder = new Decoder() {
             @Override
             public void decode(final byte[] buffer, final byte[] decoded, int decodedIndex) {
                 byte X2 = decoded[decodedIndex];
@@ -65,7 +65,9 @@ public class userApplication {
                 }
             }
         };
-        Decoder aqdcpmDecoder = new Decoder() {
+        final Decoder aqdcpmDecoder = new Decoder() {
+            int nibble;
+
             @Override
             public void decode(final byte[] buffer, final byte[] decoded, final int decodedIndex) {
                 //TODO.
@@ -162,7 +164,7 @@ public class userApplication {
             return downloadSound(filename, totalPackages, trackCode, false);
         }
 
-        private byte[] downloadSound(final String filename, final int totalPackages, final String trackCode, final boolean useAQ) throws IOException, LineUnavailableException {
+        private byte[] downloadSound(final String filename, final int totalPackages, final String trackCode, final boolean useAQ) throws IOException {
             if (0 > totalPackages || totalPackages > 999) {
                 final String message = "Invalid number of packages asked: " + totalPackages;
                 logger.severe(message);
