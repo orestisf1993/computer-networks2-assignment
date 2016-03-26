@@ -12,6 +12,8 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 import java.io.*;
 import java.net.*;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
@@ -44,12 +46,6 @@ class userApplication {
         final String SERVER_ADDRESS = "155.207.18.208";  // ithaki's address.
         final DatagramSocket server;
         final DatagramSocket client;
-        String clientPublicAddress;
-        int clientListeningPort;
-        int serverListeningPort;
-        String echoRequestCode;
-        String imageRequestCode;
-        String soundRequestCode;
         final Decoder dcpmDecoder = new Decoder() {
             @Override
             public void decode(final byte[] buffer, final byte[] decoded, int decodedIndex) {
@@ -66,13 +62,75 @@ class userApplication {
             }
         };
         final Decoder aqdcpmDecoder = new Decoder() {
-            int nibble;
+            /**
+             * Old value of last delta2.
+             */
+            int oldDelta2;
+
+            /**
+             * Get an integer from low and high bytes using little endian format.
+             * @param first The first byte.
+             * @param second The second byte.
+             * @return The integer.
+             */
+            int getInt(final byte first, final byte second) {
+                final ByteBuffer byteBuffer = ByteBuffer.wrap(new byte[]{first, second});
+                byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
+                return byteBuffer.getShort();
+            }
+
+            /**
+             * Get low byte of 16-bit integer.
+             * @param x The integer.
+             * @return The low byte.
+             */
+            byte getLowByte(final int x) {
+                return (byte) (x & 0xff);
+            }
+
+            /**
+             * Get high byte of 16-bit integer.
+             * @param x The integer.
+             * @return The high byte.
+             */
+            byte getHighByte(final int x) {
+                return (byte) ((x >> 8) & 0xff);
+            }
 
             @Override
-            public void decode(final byte[] buffer, final byte[] decoded, final int decodedIndex) {
-                //TODO.
+            public void decode(final byte[] buffer, final byte[] decoded, int decodedIndex) {
+                if (decodedIndex == 0) {
+                    // When we start decoding a new audio file, initialize last byte to 0.
+                    oldDelta2 = 0;
+                }
+
+                // Grab mean and step from header.
+                final int mean = getInt(buffer[0], buffer[1]);
+                final int step = getInt(buffer[2], buffer[3]);
+                for (int i = 4; i < AUDIO_PACKAGE_LENGTH + 4; ++i) {
+                    final byte lsByte = (byte) (buffer[i] & 0x0f);
+                    final byte msByte = (byte) ((buffer[i] >> 4) & 0x0f);
+                    final int delta1 = (msByte - 8) * step;
+                    final int delta2 = (lsByte - 8) * step;
+
+                    final int X1 = delta1 + oldDelta2;
+                    final int X2 = delta2 + delta1;
+                    oldDelta2 = delta2;
+
+                    decoded[decodedIndex++] = getLowByte(X1);
+                    decoded[decodedIndex++] = getHighByte(X1);
+                    decoded[decodedIndex++] = getLowByte(X2);
+                    decoded[decodedIndex++] = getHighByte(X2);
+
+                }
             }
         };
+        String clientPublicAddress;
+        int clientListeningPort;
+        int serverListeningPort;
+        String echoRequestCode;
+        String imageRequestCode;
+        String soundRequestCode;
 
         /**
          * Initialize the connection with the server at ithaki.
@@ -174,22 +232,18 @@ class userApplication {
             final String command = soundRequestCode + trackCode + (useAQ ? "AQ" : "") + "F" + String.format("%03d", totalPackages);
             simpleSend(command);
 
-            final Decoder decoder;
-            if (useAQ) {
-                decoder = aqdcpmDecoder;
-            } else {
-                decoder = dcpmDecoder;
-            }
+            final Decoder decoder = useAQ ? aqdcpmDecoder : dcpmDecoder;
 
-            // Received packets are 128 bytes long.
-            final byte[] buffer = new byte[AUDIO_PACKAGE_LENGTH];
-            final byte[] decoded = new byte[2 * AUDIO_PACKAGE_LENGTH * totalPackages];
-            final DatagramPacket packet = new DatagramPacket(buffer, AUDIO_PACKAGE_LENGTH);
+            // Received packets for DCPM are 128 bytes long and 132 bytes long for AQ-DCPM.
+            final int audioStepPerBufferByte = (useAQ ? 4 : 2);
+            final byte[] buffer = new byte[AUDIO_PACKAGE_LENGTH + (useAQ ? 4 : 0)];
+            final byte[] decoded = new byte[audioStepPerBufferByte * AUDIO_PACKAGE_LENGTH * totalPackages];
+            final DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
             logger.fine("Starting receiving packages.");
             for (int packageId = 0; packageId < totalPackages; packageId++) {
                 client.receive(packet);
                 logger.finest(": Received sound packet " + packageId + "  of length:" + packet.getLength());
-                decoder.decode(buffer, decoded, 2 * AUDIO_PACKAGE_LENGTH * packageId);
+                decoder.decode(buffer, decoded, audioStepPerBufferByte * AUDIO_PACKAGE_LENGTH * packageId);
             }
             return decoded;
         }
