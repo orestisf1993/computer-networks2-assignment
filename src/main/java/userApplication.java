@@ -118,7 +118,7 @@ class userApplication {
             downloadImage("test3.jpg", 1024, true);
 
             logger.info("Starting downloadSound().");
-            final byte[] audio = downloadSound("test.wav", 50, 1, false);
+            final byte[] audio = downloadSound(50, 1, false);
             playMusic(audio, 8);
         }
 
@@ -139,32 +139,32 @@ class userApplication {
             lineOut.close();
         }
 
-        byte[] downloadSound(final String filename, final int totalPackages, final int trackId) throws IOException, LineUnavailableException {
-            return downloadSound(filename, totalPackages, trackId, false);
+        byte[] downloadSound(final int totalPackages, final int trackId) throws IOException, LineUnavailableException {
+            return downloadSound(totalPackages, trackId, false);
         }
 
-        byte[] downloadSound(final String filename, final int totalPackages, final int trackId, final boolean useAQ) throws IOException, LineUnavailableException {
+        byte[] downloadSound(final int totalPackages, final int trackId, final boolean useAQ) throws IOException, LineUnavailableException {
             if (0 >= trackId || trackId > 99) {
                 final String message = "Invalid track number: " + trackId;
                 logger.severe(message);
                 throw new IllegalArgumentException(message);
             }
-            return downloadSound(filename, totalPackages, "L" + String.format("%02d", trackId), useAQ);
+            return downloadSound(totalPackages, "L" + String.format("%02d", trackId), useAQ);
         }
 
-        byte[] downloadSound(final String filename, final int totalPackages) throws IOException, LineUnavailableException {
-            return downloadSound(filename, totalPackages, "");
+        byte[] downloadSound(final int totalPackages) throws IOException, LineUnavailableException {
+            return downloadSound(totalPackages, "");
         }
 
-        byte[] downloadSound(final String filename, final int totalPackages, final boolean useAQ) throws IOException, LineUnavailableException {
-            return downloadSound(filename, totalPackages, "", useAQ);
+        byte[] downloadSound(final int totalPackages, final boolean useAQ) throws IOException, LineUnavailableException {
+            return downloadSound(totalPackages, "", useAQ);
         }
 
-        private byte[] downloadSound(final String filename, final int totalPackages, final String trackCode) throws IOException, LineUnavailableException {
-            return downloadSound(filename, totalPackages, trackCode, false);
+        private byte[] downloadSound(final int totalPackages, final String trackCode) throws IOException, LineUnavailableException {
+            return downloadSound(totalPackages, trackCode, false);
         }
 
-        private byte[] downloadSound(final String filename, final int totalPackages, final String trackCode, final boolean useAQ) throws IOException {
+        private byte[] downloadSound(final int totalPackages, final String trackCode, final boolean useAQ) throws IOException {
             if (0 > totalPackages || totalPackages > 999) {
                 final String message = "Invalid number of packages asked: " + totalPackages;
                 logger.severe(message);
@@ -188,7 +188,7 @@ class userApplication {
             logger.fine("Starting receiving packages.");
             for (int packageId = 0; packageId < totalPackages; packageId++) {
                 client.receive(packet);
-                logger.finest(filename + ": Received sound packet " + packageId + "  of length:" + packet.getLength());
+                logger.finest(": Received sound packet " + packageId + "  of length:" + packet.getLength());
                 decoder.decode(buffer, decoded, 2 * AUDIO_PACKAGE_LENGTH * packageId);
             }
             return decoded;
