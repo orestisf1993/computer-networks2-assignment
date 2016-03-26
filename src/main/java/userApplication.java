@@ -6,6 +6,10 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonReader;
 
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.SourceDataLine;
 import java.io.*;
 import java.net.*;
 import java.util.Arrays;
@@ -29,13 +33,13 @@ public class userApplication {
         logger.setLevel(loggerLevel);
     }
 
-
-    public static void main(final String[] args) throws IOException {
+    public static void main(final String[] args) throws IOException, LineUnavailableException {
         final MainInstance app = new MainInstance();
         app.run(args);
     }
 
     private static class MainInstance {
+        static final int AUDIO_PACKAGE_LENGTH = 128;
         final String JSON_FILE_NAME = "codes.json";
         final String SERVER_ADDRESS = "155.207.18.208";  // ithaki's address.
         final DatagramSocket server;
@@ -46,6 +50,27 @@ public class userApplication {
         String echoRequestCode;
         String imageRequestCode;
         String soundRequestCode;
+        Decoder dcpmDecoder = new Decoder() {
+            @Override
+            public void decode(final byte[] buffer, final byte[] decoded, int decodedIndex) {
+                byte X2 = decoded[decodedIndex];
+                for (int i = 0; i < AUDIO_PACKAGE_LENGTH; i++) {
+                    final byte lsByte = (byte) (buffer[i] & 0x0f);
+                    final byte msByte = (byte) ((buffer[i] >> 4) & 0x0f);
+                    final byte X1 = (byte) (msByte - 8 + X2);
+                    X2 = (byte) (lsByte - 8 + X1);
+
+                    decoded[decodedIndex++] = X1;
+                    decoded[decodedIndex++] = X2;
+                }
+            }
+        };
+        Decoder aqdcpmDecoder = new Decoder() {
+            @Override
+            public void decode(final byte[] buffer, final byte[] decoded, final int decodedIndex) {
+                //TODO.
+            }
+        };
 
         /**
          * Initialize the connection with the server at ithaki.
@@ -66,6 +91,15 @@ public class userApplication {
             server.connect(address, serverListeningPort);
         }
 
+        void downloadImage(final String filename) throws IOException {
+            // 128 is default (L=128). Supported are: 128,256,512,1024.
+            downloadImage(filename, 128);
+        }
+
+        void downloadImage(final String filename, final int maxLength) throws IOException {
+            downloadImage(filename, maxLength, false);
+        }
+
         void printInitMessage() {
             logger.info("Using configuration:\n" +
                     "Client address: " + clientPublicAddress + " at port: " + clientListeningPort + "\n" +
@@ -74,27 +108,88 @@ public class userApplication {
                     "echo: " + echoRequestCode + " image: " + imageRequestCode + " sound: " + soundRequestCode);
         }
 
-        void run(final String[] args) throws IOException {
+        void run(final String[] args) throws IOException, LineUnavailableException {
             logger.info("Starting execution.");
 
             logger.info("Starting image downloads.");
             downloadImage("test2.jpg", 512, false, "PTZ");
             downloadImage("test3.jpg", 1024, true);
+
+            logger.info("Starting downloadSound().");
+            final byte[] audio = downloadSound("test.wav", 50, 1, false);
+            playMusic(audio, 8);
         }
 
         void simpleSend(final String message) throws IOException {
+            logger.fine("Sending command:" + message);
             final byte[] buffer = message.getBytes();
             final DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
             server.send(packet);
         }
 
-        void downloadImage(final String filename) throws IOException {
-            // 128 is default (L=128). Supported are: 128,256,512,1024.
-            downloadImage(filename, 128);
+        void playMusic(final byte[] audio, final int Q) throws LineUnavailableException {
+            final AudioFormat linearPCM = new AudioFormat(8000, Q, 1, true, false);
+            final SourceDataLine lineOut = AudioSystem.getSourceDataLine(linearPCM);
+            lineOut.open(linearPCM, 32000);
+            lineOut.start();
+            lineOut.write(audio, 0, audio.length);
+            lineOut.stop();
+            lineOut.close();
         }
 
-        void downloadImage(final String filename, final int maxLength) throws IOException {
-            downloadImage(filename, maxLength, false);
+        byte[] downloadSound(final String filename, final int totalPackages, final int trackId) throws IOException, LineUnavailableException {
+            return downloadSound(filename, totalPackages, trackId, false);
+        }
+
+        byte[] downloadSound(final String filename, final int totalPackages, final int trackId, final boolean useAQ) throws IOException, LineUnavailableException {
+            if (0 >= trackId || trackId > 99) {
+                final String message = "Invalid track number: " + trackId;
+                logger.severe(message);
+                throw new IllegalArgumentException(message);
+            }
+            return downloadSound(filename, totalPackages, "L" + String.format("%02d", trackId), useAQ);
+        }
+
+        byte[] downloadSound(final String filename, final int totalPackages) throws IOException, LineUnavailableException {
+            return downloadSound(filename, totalPackages, "");
+        }
+
+        byte[] downloadSound(final String filename, final int totalPackages, final boolean useAQ) throws IOException, LineUnavailableException {
+            return downloadSound(filename, totalPackages, "", useAQ);
+        }
+
+        private byte[] downloadSound(final String filename, final int totalPackages, final String trackCode) throws IOException, LineUnavailableException {
+            return downloadSound(filename, totalPackages, trackCode, false);
+        }
+
+        private byte[] downloadSound(final String filename, final int totalPackages, final String trackCode, final boolean useAQ) throws IOException, LineUnavailableException {
+            if (0 > totalPackages || totalPackages > 999) {
+                final String message = "Invalid number of packages asked: " + totalPackages;
+                logger.severe(message);
+                throw new IllegalArgumentException(message);
+            }
+
+            final String command = soundRequestCode + trackCode + (useAQ ? "AQ" : "") + "F" + String.format("%03d", totalPackages);
+            simpleSend(command);
+
+            final Decoder decoder;
+            if (useAQ) {
+                decoder = aqdcpmDecoder;
+            } else {
+                decoder = dcpmDecoder;
+            }
+
+            // Received packets are 128 bytes long.
+            final byte[] buffer = new byte[AUDIO_PACKAGE_LENGTH];
+            final byte[] decoded = new byte[2 * AUDIO_PACKAGE_LENGTH * totalPackages];
+            final DatagramPacket packet = new DatagramPacket(buffer, AUDIO_PACKAGE_LENGTH);
+            logger.fine("Starting receiving packages.");
+            for (int packageId = 0; packageId < totalPackages; packageId++) {
+                client.receive(packet);
+                logger.finest(filename + ": Received sound packet " + packageId + "  of length:" + packet.getLength());
+                decoder.decode(buffer, decoded, 2 * AUDIO_PACKAGE_LENGTH * packageId);
+            }
+            return decoded;
         }
 
         void downloadImage(final String filename, final int maxLength, final boolean flow) throws IOException {
@@ -159,6 +254,10 @@ public class userApplication {
             echoRequestCode = json.get("echoRequestCode").getAsString();
             imageRequestCode = json.get("imageRequestCode").getAsString();
             soundRequestCode = json.get("soundRequestCode").getAsString();
+        }
+
+        interface Decoder {
+            void decode(final byte[] buffer, byte[] decoded, int decodedIndex);
         }
     }
 }
