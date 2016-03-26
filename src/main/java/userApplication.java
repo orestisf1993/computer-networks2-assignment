@@ -22,6 +22,9 @@ import java.util.logging.Logger;
 
 import static javax.xml.bind.DatatypeConverter.printHexBinary;
 
+/**
+ * Main application for the assignment.
+ */
 class userApplication {
     private final static Level loggerLevel = Level.ALL;
     private final static Logger logger = Logger.getLogger(userApplication.class.getName());
@@ -41,11 +44,29 @@ class userApplication {
     }
 
     private static class MainInstance {
+        /**
+         * The length in bytes for a UDP audio package.
+         */
         static final int AUDIO_PACKAGE_LENGTH = 128;
+        /**
+         * JSON file with needed codes for communication with ithaki.
+         */
         final String JSON_FILE_NAME = "codes.json";
-        final String SERVER_ADDRESS = "155.207.18.208";  // ithaki's address.
+        /**
+         * Ithaki's address.
+         */
+        final String SERVER_ADDRESS = "155.207.18.208";
+        /**
+         * {@link DatagramSocket} that sends commands to ithaki server.
+         */
         final DatagramSocket server;
+        /**
+         * {@link DatagramSocket} that receives data from ithaki server.
+         */
         final DatagramSocket client;
+        /**
+         * {@link Decoder} used for DCPM decoding of audio bytes.
+         */
         final Decoder dcpmDecoder = new Decoder() {
             @Override
             public void decode(final byte[] buffer, final byte[] decoded, int decodedIndex) {
@@ -61,6 +82,9 @@ class userApplication {
                 }
             }
         };
+        /**
+         * {@link Decoder} used for AQ-DCPM decoding of audio bytes.
+         */
         final Decoder aqdcpmDecoder = new Decoder() {
             /**
              * Old value of last delta2.
@@ -125,11 +149,29 @@ class userApplication {
                 }
             }
         };
+        /**
+         * Address of the client that runs the userApplication.
+         */
         String clientPublicAddress;
+        /**
+         * The port used by the client to receive data.
+         */
         int clientListeningPort;
+        /**
+         * The port used by the server to receive data.
+         */
         int serverListeningPort;
+        /**
+         * Code for echo requests.
+         */
         String echoRequestCode;
+        /**
+         * Code for image requests.
+         */
         String imageRequestCode;
+        /**
+         * Code for sound requests.
+         */
         String soundRequestCode;
 
         /**
@@ -151,15 +193,6 @@ class userApplication {
             server.connect(address, serverListeningPort);
         }
 
-        void downloadImage(final String filename) throws IOException {
-            // 128 is default (L=128). Supported are: 128,256,512,1024.
-            downloadImage(filename, 128);
-        }
-
-        void downloadImage(final String filename, final int maxLength) throws IOException {
-            downloadImage(filename, maxLength, false);
-        }
-
         void printInitMessage() {
             logger.info("Using configuration:\n" +
                     "Client address: " + clientPublicAddress + " at port: " + clientListeningPort + "\n" +
@@ -176,10 +209,16 @@ class userApplication {
             downloadImage("test3.jpg", 1024, true);
 
             logger.info("Starting downloadSound().");
-            final byte[] audio = downloadSound(50, 1, false);
-            playMusic(audio, 8);
+            final byte[] audio = downloadSound(50, 1, true);
+            playMusic(audio, 16);
         }
 
+        /**
+         * Send a message to the server.
+         *
+         * @param message The message.
+         * @throws IOException
+         */
         void simpleSend(final String message) throws IOException {
             logger.fine("Sending command:" + message);
             final byte[] buffer = message.getBytes();
@@ -187,6 +226,13 @@ class userApplication {
             server.send(packet);
         }
 
+        /**
+         * Play music from a byte array, using Q bits for the quantizer.
+         *
+         * @param audio The byte array containing the audio data.
+         * @param Q     The bits for the quantizer.
+         * @throws LineUnavailableException
+         */
         void playMusic(final byte[] audio, final int Q) throws LineUnavailableException {
             final AudioFormat linearPCM = new AudioFormat(8000, Q, 1, true, false);
             final SourceDataLine lineOut = AudioSystem.getSourceDataLine(linearPCM);
@@ -197,11 +243,20 @@ class userApplication {
             lineOut.close();
         }
 
-        byte[] downloadSound(final int totalPackages, final int trackId) throws IOException, LineUnavailableException {
-            return downloadSound(totalPackages, trackId, false);
-        }
-
-        byte[] downloadSound(final int totalPackages, final int trackId, final boolean useAQ) throws IOException, LineUnavailableException {
+        /**
+         * {@code trackId} is converted to a properly formatted {@link String} for use in
+         * {@link MainInstance#downloadSound(int, String, boolean)}.
+         *
+         * @param totalPackages
+         * @param trackId
+         * @param useAQ
+         * @return
+         * @throws IOException
+         * @throws LineUnavailableException
+         * @see MainInstance#downloadSound(int, String, boolean)
+         */
+        byte[] downloadSound(final int totalPackages, final int trackId, final boolean useAQ) throws IOException,
+                LineUnavailableException {
             if (0 >= trackId || trackId > 99) {
                 final String message = "Invalid track number: " + trackId;
                 logger.severe(message);
@@ -210,26 +265,25 @@ class userApplication {
             return downloadSound(totalPackages, "L" + String.format("%02d", trackId), useAQ);
         }
 
-        byte[] downloadSound(final int totalPackages) throws IOException, LineUnavailableException {
-            return downloadSound(totalPackages, "");
-        }
-
-        byte[] downloadSound(final int totalPackages, final boolean useAQ) throws IOException, LineUnavailableException {
-            return downloadSound(totalPackages, "", useAQ);
-        }
-
-        private byte[] downloadSound(final int totalPackages, final String trackCode) throws IOException, LineUnavailableException {
-            return downloadSound(totalPackages, trackCode, false);
-        }
-
-        private byte[] downloadSound(final int totalPackages, final String trackCode, final boolean useAQ) throws IOException {
+        /**
+         * Download & encode audio file.
+         *
+         * @param totalPackages Length of the audio file in {@link MainInstance#AUDIO_PACKAGE_LENGTH}-byte packages.
+         * @param trackCode     The code string used for the track code eg {@code "L01"}.
+         * @param useAQ         {@code true} if adaptive quantiser is to be used.
+         * @return The decoded audio file.
+         * @throws IOException
+         */
+        private byte[] downloadSound(final int totalPackages, final String trackCode, final boolean useAQ) throws
+                IOException {
             if (0 > totalPackages || totalPackages > 999) {
                 final String message = "Invalid number of packages asked: " + totalPackages;
                 logger.severe(message);
                 throw new IllegalArgumentException(message);
             }
 
-            final String command = soundRequestCode + trackCode + (useAQ ? "AQ" : "") + "F" + String.format("%03d", totalPackages);
+            final String command = soundRequestCode + trackCode + (useAQ ? "AQ" : "") + "F" + String.format("%03d",
+                    totalPackages);
             simpleSend(command);
 
             final Decoder decoder = useAQ ? aqdcpmDecoder : dcpmDecoder;
@@ -248,14 +302,34 @@ class userApplication {
             return decoded;
         }
 
+        /**
+         * {@code camera} defaults to {@code "FIX"}
+         *
+         * @param filename
+         * @param maxLength
+         * @param flow
+         * @throws IOException
+         * @see MainInstance#downloadImage(String, int, boolean, String)
+         */
         void downloadImage(final String filename, final int maxLength, final boolean flow) throws IOException {
             downloadImage(filename, maxLength, flow, "FIX");
         }
 
-        void downloadImage(final String filename, final int maxLength, final boolean flow, final String camera) throws IOException {
+        /**
+         * Downloads an image and saves it at specified file.
+         *
+         * @param filename  The name of the file where the image is saved.
+         * @param maxLength The length of each UDP packet.
+         * @param useFlow   {@code true} if ithaki's "FLOW" feature is to be used.
+         * @param camera    Specifies which camera is to be used for the picture.
+         * @throws IOException
+         */
+        void downloadImage(final String filename, final int maxLength, final boolean useFlow, final String camera)
+                throws IOException {
             final byte[] imageBuffer = new byte[maxLength];
             final DatagramPacket imagePacket = new DatagramPacket(imageBuffer, imageBuffer.length);
-            final String imageCommand = imageRequestCode + (flow ? "FLOW=ON" : "") + "UDP=" + maxLength + "CAM=" + camera;
+            final String imageCommand = imageRequestCode + (useFlow ? "FLOW=ON" : "") + "UDP=" + maxLength + "CAM=" +
+                    camera;
             simpleSend(imageCommand);
             final ByteArrayOutputStream stream = new ByteArrayOutputStream();
             while (true) {
@@ -264,7 +338,8 @@ class userApplication {
                 } catch (final SocketTimeoutException exception) {
                     // Since we got a timeout, we have to check if the termination sequence is that of an image.
                     final byte[] finalImageBytes = stream.toByteArray();
-                    final byte[] terminatingSequence = Arrays.copyOfRange(finalImageBytes, finalImageBytes.length - 2, finalImageBytes.length);
+                    final byte[] terminatingSequence = Arrays.copyOfRange(finalImageBytes, finalImageBytes.length -
+                            2, finalImageBytes.length);
                     final byte[] expectedTerminatingSequence = new byte[]{(byte) 0xff, (byte) 0xd9};
                     final String baseLogMessage = "Image download stopped by timeout.";
                     if (Arrays.equals(terminatingSequence, expectedTerminatingSequence)) {
@@ -285,7 +360,7 @@ class userApplication {
                 if (packetLength < maxLength) {
                     break;
                 }
-                if (flow) {
+                if (useFlow) {
                     simpleSend("NEXT");
                 }
             }
@@ -300,6 +375,22 @@ class userApplication {
             stream.close();
         }
 
+        /**
+         * Read {@link MainInstance#JSON_FILE_NAME} and initialize parameters to be used.
+         * <p>
+         * Initializes:
+         * <ul>
+         * <li>{@link MainInstance#clientPublicAddress}</li>
+         * <li>{@link MainInstance#clientListeningPort}</li>
+         * <li>{@link MainInstance#serverListeningPort}</li>
+         * <li>{@link MainInstance#echoRequestCode}</li>
+         * <li>{@link MainInstance#imageRequestCode}</li>
+         * <li>{@link MainInstance#soundRequestCode}</li>
+         * </ul>
+         * <p>Uses {@link Gson} library.</p>
+         *
+         * @throws FileNotFoundException
+         */
         void initVariables() throws FileNotFoundException {
             final JsonReader reader = new JsonReader(new FileReader(JSON_FILE_NAME));
             final JsonObject json = new Gson().fromJson(reader, JsonObject.class);
@@ -312,7 +403,18 @@ class userApplication {
             soundRequestCode = json.get("soundRequestCode").getAsString();
         }
 
+        /**
+         * Interface that hold {@link Decoder#decode(byte[], byte[], int)} function for decoding of received audio
+         * files in @{code byte[]} format.
+         */
         interface Decoder {
+            /**
+             * Decode an encoded buffer.
+             *
+             * @param buffer       The buffer.
+             * @param decoded      The decoded result.
+             * @param decodedIndex The place to start decoding in the buffer.
+             */
             void decode(final byte[] buffer, byte[] decoded, int decodedIndex);
         }
     }
