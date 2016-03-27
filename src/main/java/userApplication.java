@@ -49,6 +49,10 @@ class userApplication {
          */
         static final int AUDIO_PACKAGE_LENGTH = 128;
         /**
+         * Code used to use the "echo" functionality without the artificial delay.
+         */
+        final String ECHO_WITHOUT_DELAY_CODE = "E0000";
+        /**
          * JSON file with needed codes for communication with ithaki.
          */
         final String JSON_FILE_NAME = "codes.json";
@@ -212,6 +216,8 @@ class userApplication {
             final byte[] audio = downloadSound(50, 1, true);
             playMusic(audio, 16);
             playMusic(downloadRandomSound(100, false), 8);
+            testThroughput(1000 * 60 / 10, false);
+            testThroughput(1000 * 60 / 10, true);
         }
 
         /**
@@ -225,6 +231,35 @@ class userApplication {
             final byte[] buffer = message.getBytes();
             final DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
             server.send(packet);
+        }
+
+        void testThroughput(final long duration, final boolean enableServerDelay) throws IOException {
+            if (duration < 4 * 60 * 1000) {
+                logger.warning("Throughput duration smaller than minimum expected for assignment.");
+            }
+            final String code = enableServerDelay ? echoRequestCode : ECHO_WITHOUT_DELAY_CODE;
+            final byte[] commandBuffer = code.getBytes();
+            final byte[] receiveBuffer = new byte[128];
+            final DatagramPacket packetSend = new DatagramPacket(commandBuffer, commandBuffer.length);
+            final DatagramPacket packetReceive = new DatagramPacket(receiveBuffer, receiveBuffer.length);
+            final long timeStart = System.currentTimeMillis();
+            final StringBuilder history = new StringBuilder("" + timeStart + "\n");
+            long timeEnd = timeStart;
+            int counter = 0;
+            logger.info(String.format("Starting downloading echo packages with code %s for next %d ms.", code,
+                    duration));
+            while (timeEnd - timeStart < duration) {
+                server.send(packetSend);
+                client.receive(packetReceive);
+                timeEnd = System.currentTimeMillis();
+                counter++;
+                history.append(timeEnd + ":" + (packetReceive.getLength() + packetSend.getLength()) + "\n");
+                history.append(timeEnd + ":" + (packetReceive.getLength() + packetSend.getLength()) + "\n");
+            }
+            logger.info(String.format("Received %d packets in %d ms.", counter, duration));
+            final PrintWriter out = new PrintWriter(code + ".txt");
+            out.print(history.toString());
+            out.close();
         }
 
         /**
@@ -254,7 +289,7 @@ class userApplication {
          * @throws LineUnavailableException
          * @see MainInstance#downloadSound(int, String, boolean, boolean)
          */
-        byte[] downloadRandomSound(final int totalPackages, boolean useAQ) throws IOException,
+        byte[] downloadRandomSound(final int totalPackages, final boolean useAQ) throws IOException,
                 LineUnavailableException {
             return downloadSound(totalPackages, "", useAQ, true);
         }
@@ -295,7 +330,7 @@ class userApplication {
                 final int totalPackages,
                 final String trackCode,
                 final boolean useAQ,
-                boolean randomTrack
+                final boolean randomTrack
         ) throws IOException {
             if (0 > totalPackages || totalPackages > 999) {
                 final String message = "Invalid number of packages asked: " + totalPackages;
