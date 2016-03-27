@@ -211,6 +211,7 @@ class userApplication {
             logger.info("Starting downloadSound().");
             final byte[] audio = downloadSound(50, 1, true);
             playMusic(audio, 16);
+            playMusic(downloadRandomSound(100, false), 8);
         }
 
         /**
@@ -244,8 +245,23 @@ class userApplication {
         }
 
         /**
+         * Download a random sound by using the {@code "T"} code.
+         *
+         * @param totalPackages
+         * @param useAQ
+         * @return
+         * @throws IOException
+         * @throws LineUnavailableException
+         * @see MainInstance#downloadSound(int, String, boolean, boolean)
+         */
+        byte[] downloadRandomSound(final int totalPackages, boolean useAQ) throws IOException,
+                LineUnavailableException {
+            return downloadSound(totalPackages, "", useAQ, true);
+        }
+
+        /**
          * {@code trackId} is converted to a properly formatted {@link String} for use in
-         * {@link MainInstance#downloadSound(int, String, boolean)}.
+         * {@link MainInstance#downloadSound(int, String, boolean, boolean)}.
          *
          * @param totalPackages
          * @param trackId
@@ -253,7 +269,7 @@ class userApplication {
          * @return
          * @throws IOException
          * @throws LineUnavailableException
-         * @see MainInstance#downloadSound(int, String, boolean)
+         * @see MainInstance#downloadSound(int, String, boolean, boolean)
          */
         byte[] downloadSound(final int totalPackages, final int trackId, final boolean useAQ) throws IOException,
                 LineUnavailableException {
@@ -262,7 +278,7 @@ class userApplication {
                 logger.severe(message);
                 throw new IllegalArgumentException(message);
             }
-            return downloadSound(totalPackages, "L" + String.format("%02d", trackId), useAQ);
+            return downloadSound(totalPackages, "L" + String.format("%02d", trackId), useAQ, false);
         }
 
         /**
@@ -271,19 +287,29 @@ class userApplication {
          * @param totalPackages Length of the audio file in {@link MainInstance#AUDIO_PACKAGE_LENGTH}-byte packages.
          * @param trackCode     The code string used for the track code eg {@code "L01"}.
          * @param useAQ         {@code true} if adaptive quantiser is to be used.
+         * @param randomTrack   If {@code true} {@code "T"} code will be used.
          * @return The decoded audio file.
          * @throws IOException
          */
-        private byte[] downloadSound(final int totalPackages, final String trackCode, final boolean useAQ) throws
-                IOException {
+        private byte[] downloadSound(
+                final int totalPackages,
+                final String trackCode,
+                final boolean useAQ,
+                boolean randomTrack
+        ) throws IOException {
             if (0 > totalPackages || totalPackages > 999) {
                 final String message = "Invalid number of packages asked: " + totalPackages;
                 logger.severe(message);
                 throw new IllegalArgumentException(message);
             }
+            if (randomTrack && trackCode != "") {
+                final String message = "randomTrack can't be enabled when a trackCode is specified";
+                logger.severe(message);
+                throw new IllegalArgumentException(message);
+            }
 
-            final String command = soundRequestCode + trackCode + (useAQ ? "AQ" : "") + "F" + String.format("%03d",
-                    totalPackages);
+            final String command = soundRequestCode + trackCode + (useAQ ? "AQ" : "") + (randomTrack ? "T" : "F")
+                    + String.format("%03d", totalPackages);
             simpleSend(command);
 
             final Decoder decoder = useAQ ? aqdcpmDecoder : dcpmDecoder;
