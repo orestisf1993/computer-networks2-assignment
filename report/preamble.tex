@@ -2,9 +2,13 @@
 \RequirePackage[l2tabu, orthodox]{nag}
 % Specify the type of document
 \documentclass[a4paper]{report}
-%\documentclass[draft]{report}
 
 % packages
+% Argument 'table' for '\cellcolor{}' command.
+% Should be high because it might get loaded by another package with different arguments:
+% - http://tex.stackexchange.com/questions/87197/latex-error-option-clash-for-package-xcolor-for-table
+% - http://tex.stackexchange.com/questions/83101/option-clash-for-package-xcolor
+\usepackage[usenames, table]{xcolor}
 
 % https://foss.ntua.gr/wiki/index.php/%CE%95%CE%BB%CE%BB%CE%B7%CE%BD%CE%B9%CE%BA%CE%B1_%CF%83%CF%84%CE%BF_TeX/LaTeX_%CE%BC%CE%B5_%CF%84%CE%BF_XeTeX#.CE.97yphenation
 % title in pic:
@@ -83,7 +87,6 @@
 \usepackage{lstautogobble}
 % Change the caption name for the listings
 \renewcommand{\lstlistingname}{Code}
-\usepackage{color}
 \definecolor{mygreen}{rgb}{0,0.6,0}
 \definecolor{mygray}{rgb}{0.5,0.5,0.5}
 \definecolor{mymauve}{rgb}{0.58,0,0.82}

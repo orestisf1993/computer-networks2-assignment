@@ -74,3 +74,39 @@ Streaming. Τα δεδομένα θεωρούνται ένα stream από bytes
 \caption{Σύγκριση UDP και TCP}\label{table:udp-tcp}
 \end{table}
 \FloatBarrier
+
+\subsection{Δομή πακέτου UDP}
+Η δομή ενός πακέτου UDP περιγράφεται αναλυτικά στο \href{http://tools.ietf.org/html/rfc768 RFC 768}{πρότυπο RFC 768} όπως αναφέρθηκε παραπάνω.
+Στον \hyperref[table:udp-header]{πίνακα \ref{table:udp-header}} φαίνεται η δομή ενός UDP πακέτου.
+
+Κάθε πακέτο UDP έχει μία κεφαλίδα (header) που αναφέρει τα χαρακτηριστικά του. Η κεφαλίδα περιλαμβάνει 4 πεδία (λίγα σε σχέση με πρωτόκολλα όπως το TCP).
+Δύο από τα τέσσερα πεδία είναι προαιρετικά
+(\textcolor{blue!25}{χρωματισμένα} στον \hyperref[table:udp-header]{πίνακα \ref{table:udp-header}}).
+Τα πεδία είναι τα εξής:
+\begin{itemize}
+\item Source port (προαιρετικό).
+Η πόρτα του αποστολέα από την οποία προήλθε το πακέτο. Εάν ο παραλήπτης επιθυμεί να στείλει κάποια απάντηση, θα πρέπει να την στείλει στην πόρτα αυτήν.
+
+\item Destination port.
+Η πόρτα του παραλήπτη στην οποία θα πρέπει να παραδοθεί το πακέτο.
+
+\item Length
+Περιλαμβάνει το μέγεθος του πακέτου σε bytes. Το μικρότερο δυνατό είναι 8 bytes, αφού η κεφαλίδα αυτή καθ' αυτή καταλαμβάνει τόσο χώρο.
+Θεωρητικά, το μέγεθος του UDP πακέτου δεν μπορεί να ξεπερνάει τα 65527 bytes.
+
+\item Checksum (προαιρετικό).
+Χρησιμοποιείται για επαλήθευση της ορθότητας του πακέτου στο σύνολό του, δηλαδή τόσο της κεφαλίδας όσο και των δεδομένων.
+Υπολογίζεται μέσω του Standard Internet Checksum αλγορίθμου (RFC 1071)\cite{rfc1071}\cite{udp-erg-abdn}.
+\end{itemize}
+
+\begin{table}
+\centering
+\begin{tabular}{|c|c|c|}
+\hline
+{}&\bfseries{Bits 0-15}&\bfseries{Bits 16-31}\\\hline
+0&\cellcolor{blue!25}Source Port&Destination Port\\\hline
+32&Length&\cellcolor{blue!25}Checksum\\\hline
+64&\multicolumn{2}{c|}{Data}\\\hline
+\end{tabular}
+\caption{UDP πακέτο}\label{table:udp-header}
+\end{table}
