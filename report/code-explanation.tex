@@ -104,3 +104,39 @@ Contains the collections framework, legacy collection classes, event model, date
 \sloppy Χρησιμοποιούνται διάφορες βασικές λειτουργίες όπως:
 \mintinline{java}!java.util.logging! και \mintinline{java}!java.util.Arrays!.
 \end{itemize}
+
+\section{Η \mintinline{java}!class userApplication!}
+\begin{code}
+\begin{minted}{java}
+/**
+ * Main application for the assignment.
+ */
+class userApplication {
+    private final static Level loggerLevel = Level.ALL;
+    private final static Logger logger = Logger.getLogger(userApplication.class.getName());
+
+    static {
+        // http://stackoverflow.com/questions/6315699/why-are-the-level-fine-logging-messages-not-showing
+        final Handler consoleHandler = new ConsoleHandler();
+        consoleHandler.setLevel(loggerLevel);
+        logger.setUseParentHandlers(false);
+        logger.addHandler(consoleHandler);
+        logger.setLevel(loggerLevel);
+    }
+
+    public static void main(final String[] args) throws IOException, LineUnavailableException {
+        final MainInstance app = new MainInstance();
+        app.run(args);
+    }
+
+    private static class MainInstance {...}
+}
+\end{minted}
+\caption{Η εξωτερική κλάση \mintinline{java}!userApplication!}
+\end{code}
+Αποτελεί την εξωτερική κλάση που υλοποιεί την εφαρμογή.
+Ρόλος της είναι:
+\begin{itemize}
+\item Η αρχικοποίηση ενός αντικειμένου \mintinline{java}!Logger logger! που βοηθάει στο debugging και την εκτύπωση μηνυμάτων.
+\item Η κλήση της \mintinline{java}!public static void main()! που αρχικοποιεί ένα αντικείμενο της βασικής κλάσης \codeRef{MainInstance}.
+\end{itemize}
