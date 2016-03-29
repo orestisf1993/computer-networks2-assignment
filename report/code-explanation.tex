@@ -1,3 +1,4 @@
+\newcommand{\codeRef}[1]{\hyperref[section:#1]{\mintinline{java}!#1()!}}
 \chapter{Η εφαρμογή (\appname{})}
 \section{Script \scriptname{}}
 Για την γρήγορη εξαγωγή των κωδικών από το site \url{http://ithaki.eng.auth.gr/netlab/index.html} γράφτηκε ένα script σε
@@ -17,3 +18,89 @@
 \label{listing:extract-codes}
 \end{code}
 
+\section{Χρήση βιβλιοθηκών \& imports}
+\begin{code}
+\begin{minted}{java}
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.stream.JsonReader;
+
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.SourceDataLine;
+import java.io.*;
+import java.net.*;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.Arrays;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static javax.xml.bind.DatatypeConverter.printHexBinary;
+\end{minted}
+\caption{Imports στο \appname}
+\end{code}
+
+Χρησιμοποιήθηκαν οι εξής βιβλιοθήκες:
+\begin{itemize}
+\item
+\href{https://github.com/google/gson}{\mintinline{java}!com.google.gson.Gson!}:
+\begin{displayquote}
+Gson is a Java library that can be used to convert Java Objects into their JSON representation. It can also be used to convert a JSON string to an equivalent Java object.
+\end{displayquote}
+Βιβλιοθήκη της google, για την ανάγνωση και parsing αρχείων τύπου \texttt{JSON}.
+Το σχετικό dependency στο maven είναι:
+\begin{minted}{xml}
+<dependencies>
+    <dependency>
+        <groupId>com.google.code.gson</groupId>
+        <artifactId>gson</artifactId>
+        <version>2.6.2</version>
+    </dependency>
+</dependencies>
+\end{minted}
+Χρησιμοποιείται αποκλειστικά στη μέθοδο \codeRef{initVariables}.
+
+\item
+\href{https://docs.oracle.com/javase/8/docs/api/javax/sound/sampled/package-summary.html}{\mintinline{java}!javax.sound.sampled!}:
+\begin{displayquote}
+Provides interfaces and classes for capture, processing, and playback of sampled audio data.
+\end{displayquote}
+Για την αναπαραγωγή ήχου που λαμβάνεται σε μορφή \mintinline{java}!byte[]! (array).
+Χρησιμοποιείται στην μέθοδο \codeRef{playMusic}.
+
+\item
+\href{https://docs.oracle.com/javase/8/docs/api/java/io/package-summary.html}{\mintinline{java}!java.io.*!}:
+\begin{displayquote}
+Provides for system input and output through data streams, serialization and the file system.
+\end{displayquote}
+Χρησιμοποιείται για την διαχείριση αρχείων. Κυρίως για την αποθήκευση των αποτελεσμάτων.
+
+\item
+\href{https://docs.oracle.com/javase/8/docs/api/java/net/package-summary.html}{\mintinline{java}!java.net.*!}:
+\begin{displayquote}
+Provides the classes for implementing networking applications.
+\end{displayquote}
+Περιλαμβάνει κλάσεις διαχείρισης δικτυακών πόρων.
+Παρέχει τις πολύ βασικές κλάσεις για την εφαρμογή μας:
+\mintinline{java}!DatagramPacket! και \mintinline{java}!DatagramSocket!.
+Χρησιμοποιείται σε όλες τις μεθόδους που έχουν σχέση με τον server της Ιθάκης.
+
+\item
+\href{https://docs.oracle.com/javase/8/docs/api/java/nio/package-summary.html}{\mintinline{java}!java.nio!}:
+\begin{displayquote}
+Defines buffers, which are containers for data, and provides an overview of the other NIO packages.
+\end{displayquote}
+Χρησιμοποιείται για διάφορες λειτουργικότητες σχετικές με buffers.
+
+\item
+\href{https://docs.oracle.com/javase/8/docs/api/java/util/package-summary.html}{\mintinline{java}!java.util!}:
+\begin{displayquote}
+Contains the collections framework, legacy collection classes, event model, date and time facilities, internationalization, and miscellaneous utility classes (a string tokenizer, a random-number generator, and a bit array).
+\end{displayquote}
+\sloppy Χρησιμοποιούνται διάφορες βασικές λειτουργίες όπως:
+\mintinline{java}!java.util.logging! και \mintinline{java}!java.util.Arrays!.
+\end{itemize}
