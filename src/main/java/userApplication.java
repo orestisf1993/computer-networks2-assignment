@@ -69,9 +69,9 @@ class userApplication {
          */
         final DatagramSocket client;
         /**
-         * {@link Decoder} used for DCPM decoding of audio bytes.
+         * {@link Decoder} used for DPCM decoding of audio bytes.
          */
-        final Decoder dcpmDecoder = new Decoder() {
+        final Decoder dpcmDecoder = new Decoder() {
             @Override
             public void decode(final byte[] buffer, final byte[] decoded, int decodedIndex) {
                 byte X2 = decoded[decodedIndex];
@@ -87,9 +87,9 @@ class userApplication {
             }
         };
         /**
-         * {@link Decoder} used for AQ-DCPM decoding of audio bytes.
+         * {@link Decoder} used for AQ-DPCM decoding of audio bytes.
          */
-        final Decoder aqdcpmDecoder = new Decoder() {
+        final Decoder aqdpcmDecoder = new Decoder() {
             /**
              * Old value of last delta2.
              */
@@ -347,9 +347,9 @@ class userApplication {
                     + String.format("%03d", totalPackages);
             simpleSend(command);
 
-            final Decoder decoder = useAQ ? aqdcpmDecoder : dcpmDecoder;
+            final Decoder decoder = useAQ ? aqdpcmDecoder : dpcmDecoder;
 
-            // Received packets for DCPM are 128 bytes long and 132 bytes long for AQ-DCPM.
+            // Received packets for DPCM are 128 bytes long and 132 bytes long for AQ-DPCM.
             final int audioStepPerBufferByte = (useAQ ? 4 : 2);
             final byte[] buffer = new byte[AUDIO_PACKAGE_LENGTH + (useAQ ? 4 : 0)];
             final byte[] decoded = new byte[audioStepPerBufferByte * AUDIO_PACKAGE_LENGTH * totalPackages];
