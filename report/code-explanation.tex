@@ -1,6 +1,47 @@
 \newcommand{\codeRef}[2][]{\hyperref[section:#2]{\mintinline{java}!#2#1!}}
 \chapter{Η εφαρμογή (\appname{})}
-\section{Script \scriptname{}}
+\section{Ρυθμίσεις router}
+\begin{figure}[htb]
+\centering
+\includegraphics[width=\linewidth]{images/router}
+\caption{Ρυθμίσεις router}
+\label{fig:router}
+\end{figure}
+Για την σωστή λειτουργία της εφαρμογής \appname{} χρειάστηκε η αλλαγή ρυθμίσεων του router.
+Ακολουθήθηκαν τα εξής βήματα:
+\begin{enumerate}
+\item Επίσκεψη της σελίδας ρυθμίσεων του router \url{http://192.168.1.1}.
+Πρόκειται για μία συσκευή ZTE H108NS, Firmware Version: \texttt{H108NSV1.1.7u\_ZRD\_GR2\_A68}.
+\item Εισαγωγή του κωδικού διαχειριστή.
+\item Περιήγηση στη σελίδα: \texttt{Advanced Setup > NAT > Virtual Server}.
+\item Δημιουργία νέου κανόνα με τις κατάλληλες ρυθμίσεις.
+Για τον έλεγχο της ip του μηχανήματος όπου εκτελείται η εφαρμογή εκτελέσαμε:
+\begin{code}
+\begin{minted}{bash}
+$ ifconfig enp2s0
+enp2s0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 192.168.1.5  netmask 255.255.255.0  broadcast 192.168.1.255
+        inet6 2a02:587:1808:bb00:5726:d95c:595b:5eae  prefixlen 64  scopeid 0x0<global>
+        inet6 fe80::da4c:b00b:629f:ea30  prefixlen 64  scopeid 0x20<link>
+        ether 08:60:6e:c7:db:b8  txqueuelen 1000  (Ethernet)
+        RX packets 116646  bytes 97594158 (93.0 MiB)
+        RX errors 0  dropped 14  overruns 0  frame 0
+        TX packets 102421  bytes 56928201 (54.2 MiB)
+        TX errors 0  dropped 1 overruns 0  carrier 0  collisions 0
+\end{minted}
+\caption{Η IP στο τοπικό μηχάνημα}
+\end{code}
+\begin{code}
+\begin{minted}{bash}
+$ uname -srmo
+Linux 4.4.5-1-ARCH x86_64 GNU/Linux
+\end{minted}
+\caption{Το λειτουργικό σύστημα του τοπικού μηχανήματος}
+\end{code}
+Η ρύθμιση φαίνεται στο \imageref{router}.
+\end{enumerate}
+
+\section{Script \scriptname{}}\label{section:script}
 Για την γρήγορη εξαγωγή των κωδικών από το site \url{http://ithaki.eng.auth.gr/netlab/index.html} γράφτηκε ένα script σε
 \href{https://www.python.org/}{python3}
 όπου πραγματοποιεί τη σύνδεση (login) με το site με τα σχετικά credentials και εξάγει σε ένα αρχείο τους κωδικούς σε μορφή
