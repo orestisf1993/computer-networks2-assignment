@@ -292,3 +292,5 @@ sympy-plots-for-*.tex/
 
 *.json
 report.pdf
+
+*.wav
