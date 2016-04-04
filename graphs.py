@@ -182,6 +182,15 @@ def plot_audio(code, track_id, texts, use_aq=False, n_packets=999):
         plt.hist(data, weights=perc_weights(data), normed=False)
         plt.gca().yaxis.set_major_formatter(percent_formatter)
 
+    def plot_aq_stats():
+        with open(base_filename + ".txt") as file_obj:
+            stats = json.load(file_obj)
+        for metric, y in stats.items():
+            figures.append(plt.figure())
+            plt.scatter(np.arange(len(y)), y)
+            add_texts(texts[metric])
+            plt_save(base_filename + "-" + metric)
+
     aq_code = "AQ" * use_aq
     aq_title_str = (", " + aq_code + ", ") * use_aq
     formatter = {'code': code, 'track_id': track_id, 'aq_code': aq_code, 'n_packets': n_packets, 'date': "!#TODO#!",
@@ -204,6 +213,9 @@ def plot_audio(code, track_id, texts, use_aq=False, n_packets=999):
     plt_hist(decoded)
     add_texts(texts['decoded-hist'])
     plt_save(base_filename + '-decoded-hist')
+
+    if use_aq:
+        plot_aq_stats()
 
     close_figures(figures)
 
@@ -232,6 +244,16 @@ texts_dpcm = {
         'title': "Κατανομή διαφορών δειγμάτων: τραγούδι #{track_id}{aq} ({code})",
         'xlabel': "Τιμή",
         'ylabel': "Συχνότητα"
+    },
+    'mean': {
+        'title': "Εξέλιξη μέσης τιμής: τραγούδι #{track_id}{aq} ({code})",
+        'xlabel': "Αριθμός πακέτου",
+        'ylabel': r"Τιμή $\mu$"
+    },
+    'step': {
+        'title': "Εξέλιξη βήματος: τραγούδι #{track_id}{aq} ({code})",
+        'xlabel': "Αριθμός πακέτου",
+        'ylabel': r"Τιμή $\beta$"
     }
 }
 plot_audio(codes['soundRequestCode'], track_id=10, use_aq=False, texts=texts_dpcm)
