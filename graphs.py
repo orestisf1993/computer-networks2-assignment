@@ -54,6 +54,11 @@ def plt_add_stats(mean, std):
                  "{0:.2f} ms".format(std))
 
 
+def plt_save(filename, file_format='pdf'):
+    filename = os.path.join(PLOT_PATH, filename + '.' + file_format)
+    plt.savefig(filename=filename, format=file_format)
+
+
 def plot_code(code):
     times = read_times(code + ".txt")
     # start_time = times[0]
@@ -139,12 +144,95 @@ def close_figures(figures):
         plt.close(figure)
 
 
+def plot_audio(code, track_id, texts, use_aq=False, n_packets=999):
+    def open_audio_bytes(filename):
+        with open(filename, 'rb') as file_obj:
+            res = []
+            size_to_read = 1
+            byte = file_obj.read(size_to_read)
+            while byte:
+                res.append(int.from_bytes(byte, byteorder='big', signed=True))
+                byte = file_obj.read(size_to_read)
+        return np.array(res)
+
+    def plt_wavelength(data, start=None, end=None, size=10000):
+        def restore_size_format(y, position):
+            # Ignore the passed in position. This has the effect of scaling the default tick locations.
+            return str(int(multiplier * y))
+
+        step_formatter = FuncFormatter(restore_size_format)
+
+        data = data[start:end]
+        limit = data.size // size * size
+        data = np.reshape(data[:limit], (size, -1))
+        # Multiplier is the automatic dimension.
+        multiplier = data.shape[1]
+        data = np.average(data, axis=1)
+        figures.append(plt.figure())
+        plt.gca().xaxis.set_major_formatter(step_formatter)
+        plt.plot(data)
+        plt.ylim([min(data), max(data)])
+
+    def add_texts(plt_texts):
+        for field, text in plt_texts.items():
+            getattr(plt, field)(text.format(**formatter))
+
+    def plt_hist(data):
+        figures.append(plt.figure())
+        plt.hist(data, weights=perc_weights(data), normed=False)
+        plt.gca().yaxis.set_major_formatter(percent_formatter)
+
+    aq_code = "AQ" * use_aq
+    aq_title_str = (", " + aq_code + ", ") * use_aq
+    formatter = {'code': code, 'track_id': track_id, 'aq_code': aq_code, 'n_packets': n_packets, 'date': "!#TODO#!",
+                 'aq': aq_title_str}
+    base_filename = "{code}L{track_id}{aq_code}F{n_packets}".format(**formatter)
+
+    figures = []
+
+    decoded = open_audio_bytes(base_filename + 'decoded.data')
+    buffer = open_audio_bytes(base_filename + 'buffer.data')
+
+    plt_wavelength(buffer, size=10000)
+    add_texts(texts['buffer'])
+    plt_save(base_filename + '-buffer')
+
+    plt_wavelength(decoded, size=10000)
+    add_texts(texts['decoded'])
+    plt_save(base_filename + '-decoded')
+
+    plt_hist(decoded)
+    add_texts(texts['decoded-hist'])
+    plt_save(base_filename + '-decoded-hist')
+
+    close_figures(figures)
+
+
 # Init matplotlib & settings.
 plt.rc('text', usetex=False)
 plt.style.use('ggplot')
 matplotlib.rc('font', family='Ubuntu')
 
+os.makedirs(PLOT_PATH, exist_ok=True)
 codes = read_codes()
 plot_code('E0000')
 plot_code(codes['echoRequestCode'])
-os.makedirs(PLOT_PATH, exist_ok=True)
+texts_dpcm = {
+    'buffer': {
+        'title': "Κυματομορφή από την Ithaki: τραγούδι #{track_id}{aq} ({code})",
+        'xlabel': "Αριθμός δείγματος",
+        'ylabel': "Τιμή"
+    },
+    'decoded': {
+        'title': "Αποκωδικοποιημένη κυματομορφή: τραγούδι #{track_id}{aq} ({code})",
+        'xlabel': "Αριθμός δείγματος",
+        'ylabel': "Τιμή"
+    },
+    'decoded-hist': {
+        'title': "Κατανομή διαφορών δειγμάτων: τραγούδι #{track_id}{aq} ({code})",
+        'xlabel': "Τιμή",
+        'ylabel': "Συχνότητα"
+    }
+}
+plot_audio(codes['soundRequestCode'], track_id=10, use_aq=False, texts=texts_dpcm)
+plot_audio(codes['soundRequestCode'], track_id=23, use_aq=True, texts=texts_dpcm)
