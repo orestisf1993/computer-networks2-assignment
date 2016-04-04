@@ -282,8 +282,9 @@ class userApplication {
                 client.receive(packetReceive);
                 timeEnd = System.currentTimeMillis();
                 counter++;
-                history.append(timeEnd + ":" + (packetReceive.getLength() + packetSend.getLength()) + "\n");
-                history.append(timeEnd + ":" + (packetReceive.getLength() + packetSend.getLength()) + "\n");
+                history.append(timeEnd).append(":")
+                        .append(packetReceive.getLength() + packetSend.getLength()).append(":")
+                        .append(timeout).append("\n");
             }
             logger.info(String.format("Received %d packets in %d ms.", counter, duration));
             final PrintWriter out = new PrintWriter(code + ".txt");
