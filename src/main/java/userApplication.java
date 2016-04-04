@@ -16,6 +16,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -365,7 +366,7 @@ class userApplication {
                 logger.severe(message);
                 throw new IllegalArgumentException(message);
             }
-            if (randomTrack && trackCode != "") {
+            if (randomTrack && !Objects.equals(trackCode, "")) {
                 final String message = "randomTrack can't be enabled when a trackCode is specified";
                 logger.severe(message);
                 throw new IllegalArgumentException(message);
