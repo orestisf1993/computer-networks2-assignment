@@ -79,11 +79,13 @@ def plot_code(code):
             bins[limit] = (end - start) * ECHO_PACKAGE_LENGTH_BYTES / divisor
         throughput[seconds_limit] = x[x != 0], bins[bins != 0]
 
+    figures = []  # Hold figures opened so we can save/close them after.
+
     def plot_throughput(limit, x, averages):
         mean = averages.mean()
         std = averages.std()
 
-        plt.figure()
+        figures.append(plt.figure())
         plt.plot_date(x, averages)
         ax = plt.gca()
         ax.xaxis.set_major_formatter(DATE_FORMAT)
@@ -98,7 +100,7 @@ def plot_code(code):
     for key, value in throughput.items():
         plot_throughput(key, *value)
 
-    plt.figure()
+    figures.append(plt.figure())
     x = range(1, len(diffs) + 1)
     plt.scatter(x, diffs)
     ax = plt.gca()
@@ -110,7 +112,7 @@ def plot_code(code):
     plt_add_stats(mean, std)
     plt.savefig(filename=os.path.join(PLOT_PATH, '{code}-response-time.pdf'.format(code=code)), format='pdf')
 
-    plt.figure()
+    figures.append(plt.figure())
     plt.hist(diffs, bins=10, weights=perc_weights(diffs), normed=False)
     plt.title("Συχνότητα ανά χρόνο απόκρισης")
     plt.xlabel("Χρόνος Απόκρισης")
@@ -121,7 +123,7 @@ def plot_code(code):
     # Histograms from throughput.
     for key, value in throughput.items():
         averages = value[1]
-        plt.figure()
+        figures.append(plt.figure())
         plt.hist(averages, bins=10, weights=perc_weights(averages), normed=False)
         plt.title("Συχνότητα throughput")
         plt.xlabel("Throughput")
@@ -129,6 +131,12 @@ def plot_code(code):
         plt.gca().yaxis.set_major_formatter(percent_formatter)
         plt.savefig(filename=os.path.join(PLOT_PATH, '{code}-lim{lim}-hist.pdf'.format(code=code, lim=key)),
                     format='pdf')
+    close_figures(figures)
+
+
+def close_figures(figures):
+    for figure in figures:
+        plt.close(figure)
 
 
 # Init matplotlib & settings.
