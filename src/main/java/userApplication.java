@@ -396,6 +396,19 @@ class userApplication {
                 client.receive(packet);
                 logger.finest(": Received sound packet " + packageId + "  of length:" + packet.getLength());
                 decoder.decode(buffer, decoded, audioStepPerBufferByte * AUDIO_PACKAGE_LENGTH * packageId);
+                try {
+                    streamOut.write(buffer);
+                } catch (final Exception exception) {
+                    streamOut.close();
+                }
+            }
+            decoder.saveHistory(getUniqueFile(command, "txt"));
+            streamOut.close();
+            streamOut = new FileOutputStream(getUniqueFile(command + "decoded", "data"));
+            try {
+                streamOut.write(decoded);
+            } finally {
+                streamOut.close();
             }
             return decoded;
         }
