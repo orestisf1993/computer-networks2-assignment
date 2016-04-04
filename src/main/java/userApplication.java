@@ -391,12 +391,24 @@ class userApplication {
             final byte[] decoded = new byte[audioStepPerBufferByte * AUDIO_PACKAGE_LENGTH * totalPackages];
             final DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
             logger.fine("Starting receiving packages.");
+            FileOutputStream streamOut = new FileOutputStream(getUniqueFile(command + "buffer", "data"));
             for (int packageId = 0; packageId < totalPackages; packageId++) {
                 client.receive(packet);
                 logger.finest(": Received sound packet " + packageId + "  of length:" + packet.getLength());
                 decoder.decode(buffer, decoded, audioStepPerBufferByte * AUDIO_PACKAGE_LENGTH * packageId);
             }
             return decoded;
+        }
+
+        File getUniqueFile(final String baseFilename, final String extension) {
+            int i = 1;
+            String filename = baseFilename + "." + extension;
+            File file = new File(filename);
+            while (file.exists()) {
+                filename = baseFilename + "-" + i++ + "." + extension;
+                file = new File(filename);
+            }
+            return file;
         }
 
         /**
