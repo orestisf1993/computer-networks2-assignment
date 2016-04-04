@@ -74,7 +74,7 @@ class userApplication {
         final Decoder dpcmDecoder = new Decoder() {
             @Override
             public void decode(final byte[] buffer, final byte[] decoded, int decodedIndex) {
-                byte X2 = decoded[decodedIndex];
+                byte X2 = decodedIndex > 0 ? decoded[decodedIndex - 1] : 0;
                 for (int i = 0; i < AUDIO_PACKAGE_LENGTH; i++) {
                     final byte lsByte = (byte) (buffer[i] & 0x0f);
                     final byte msByte = (byte) ((buffer[i] >> 4) & 0x0f);
