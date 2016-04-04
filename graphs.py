@@ -144,7 +144,7 @@ def close_figures(figures):
         plt.close(figure)
 
 
-def plot_audio(code, track_id, texts, use_aq=False, n_packets=999):
+def plot_audio(code, texts, track_id=None, use_aq=False, n_packets=999, file_number=None, random_track=False):
     def open_audio_bytes(filename):
         with open(filename, 'rb') as file_obj:
             res = []
@@ -175,7 +175,12 @@ def plot_audio(code, track_id, texts, use_aq=False, n_packets=999):
 
     def add_texts(plt_texts):
         for field, text in plt_texts.items():
-            getattr(plt, field)(text.format(**formatter))
+            oldtext = text
+            text = text.format(**formatter)
+            while text != oldtext:
+                oldtext = text
+                text = text.format(**formatter)
+            getattr(plt, field)(text)
 
     def plt_hist(data):
         figures.append(plt.figure())
@@ -191,28 +196,37 @@ def plot_audio(code, track_id, texts, use_aq=False, n_packets=999):
             add_texts(texts[metric])
             plt_save(base_filename + "-" + metric)
 
-    aq_code = "AQ" * use_aq
-    aq_title_str = (", " + aq_code + ", ") * use_aq
-    formatter = {'code': code, 'track_id': track_id, 'aq_code': aq_code, 'n_packets': n_packets, 'date': "!#TODO#!",
-                 'aq': aq_title_str}
-    base_filename = "{code}L{track_id}{aq_code}F{n_packets}".format(**formatter)
+    assert (track_id is not None) != random_track
+    formatter = {
+        'code': code,
+        'track_id': ("L" + str(track_id)) * (not random_track),
+        'aq_code': "AQ" * use_aq,
+        'n_packets': n_packets,
+        'date': "!#TODO#!",
+        'aq': ", {aq_code}, " * use_aq,
+        'file_number': ("-" + str(file_number)) * (file_number is not None),
+        'track_type': "T" if random_track else "F",
+        "track_info": "τυχαίο κομμάτι από γεννήρια (AQ)" if random_track else "τραγούδι {track_id}{aq}"
+    }
+    base_filename = "{code}{track_id}{aq_code}{track_type}{n_packets}".format(**formatter)
+    logging.info("Base file:%s.", base_filename)
 
     figures = []
 
-    decoded = open_audio_bytes(base_filename + 'decoded.data')
-    buffer = open_audio_bytes(base_filename + 'buffer.data')
+    decoded = open_audio_bytes(base_filename + 'decoded{file_number}.data'.format(**formatter))
+    buffer = open_audio_bytes(base_filename + 'buffer{file_number}.data'.format(**formatter))
 
     plt_wavelength(buffer, size=10000)
     add_texts(texts['buffer'])
-    plt_save(base_filename + '-buffer')
+    plt_save(base_filename + '-buffer{file_number}'.format(**formatter))
 
     plt_wavelength(decoded, size=10000)
     add_texts(texts['decoded'])
-    plt_save(base_filename + '-decoded')
+    plt_save(base_filename + '-decoded{file_number}'.format(**formatter))
 
     plt_hist(decoded)
     add_texts(texts['decoded-hist'])
-    plt_save(base_filename + '-decoded-hist')
+    plt_save(base_filename + '-decoded-hist{file_number}'.format(**formatter))
 
     if use_aq:
         plot_aq_stats()
@@ -231,30 +245,33 @@ plot_code('E0000')
 plot_code(codes['echoRequestCode'])
 texts_dpcm = {
     'buffer': {
-        'title': "Κυματομορφή από την Ithaki: τραγούδι #{track_id}{aq} ({code})",
+        'title': "Κυματομορφή από την Ithaki: {track_info} ({code})",
         'xlabel': "Αριθμός δείγματος",
         'ylabel': "Τιμή"
     },
     'decoded': {
-        'title': "Αποκωδικοποιημένη κυματομορφή: τραγούδι #{track_id}{aq} ({code})",
+        'title': "Αποκωδικοποιημένη κυματομορφή: {track_info} ({code})",
         'xlabel': "Αριθμός δείγματος",
         'ylabel': "Τιμή"
     },
     'decoded-hist': {
-        'title': "Κατανομή διαφορών δειγμάτων: τραγούδι #{track_id}{aq} ({code})",
+        'title': "Κατανομή διαφορών δειγμάτων: {track_info} ({code})",
         'xlabel': "Τιμή",
         'ylabel': "Συχνότητα"
     },
     'mean': {
-        'title': "Εξέλιξη μέσης τιμής: τραγούδι #{track_id}{aq} ({code})",
+        'title': "Εξέλιξη μέσης τιμής: {track_info} ({code})",
         'xlabel': "Αριθμός πακέτου",
         'ylabel': r"Τιμή $\mu$"
     },
     'step': {
-        'title': "Εξέλιξη βήματος: τραγούδι #{track_id}{aq} ({code})",
+        'title': "Εξέλιξη βήματος: {track_info} ({code})",
         'xlabel': "Αριθμός πακέτου",
         'ylabel': r"Τιμή $\beta$"
     }
 }
 plot_audio(codes['soundRequestCode'], track_id=10, use_aq=False, texts=texts_dpcm)
 plot_audio(codes['soundRequestCode'], track_id=23, use_aq=True, texts=texts_dpcm)
+plot_audio(codes['soundRequestCode'], track_id=23, use_aq=True, texts=texts_dpcm)
+plot_audio(codes['soundRequestCode'], use_aq=True, random_track=True, texts=texts_dpcm)
+plot_audio(codes['soundRequestCode'], use_aq=True, random_track=True, texts=texts_dpcm, file_number=1)
