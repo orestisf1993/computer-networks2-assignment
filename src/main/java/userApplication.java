@@ -14,6 +14,7 @@ import java.io.*;
 import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
@@ -85,6 +86,9 @@ class userApplication {
                     decoded[decodedIndex++] = X2;
                 }
             }
+
+            @Override
+            public void saveHistory(final File filename) throws FileNotFoundException {}
         };
         /**
          * {@link Decoder} used for AQ-DPCM decoding of audio bytes.
@@ -94,6 +98,24 @@ class userApplication {
              * Old value of last delta2.
              */
             int oldDelta2;
+            /**
+             * Save history of values of mean m.
+             */
+            ArrayList<Integer> meanHistory = new ArrayList<>();
+            /**
+             * Save history of values of step b.
+             */
+            ArrayList<Integer> stepHistory = new ArrayList<>();
+
+            @Override
+            public void saveHistory(final File filename) throws FileNotFoundException {
+                final PrintWriter out = new PrintWriter(filename);
+                out.println("{");
+                out.println("  \"mean\":" + meanHistory.toString() + ",");
+                out.println("  \"step\":" + stepHistory.toString());
+                out.println("}");
+                out.close();
+            }
 
             /**
              * Get an integer from low and high bytes using little endian format.
@@ -130,19 +152,25 @@ class userApplication {
                 if (decodedIndex == 0) {
                     // When we start decoding a new audio file, initialize last byte to 0.
                     oldDelta2 = 0;
+                    meanHistory.clear();
+                    stepHistory.clear();
                 }
 
                 // Grab mean and step from header.
                 final int mean = getInt(buffer[0], buffer[1]);
+                logger.finest("mean: " + mean);
+                meanHistory.add(mean);
                 final int step = getInt(buffer[2], buffer[3]);
+                logger.finest("step: " + step);
+                stepHistory.add(step);
                 for (int i = 4; i < AUDIO_PACKAGE_LENGTH + 4; ++i) {
                     final byte lsByte = (byte) (buffer[i] & 0x0f);
                     final byte msByte = (byte) ((buffer[i] >> 4) & 0x0f);
                     final int delta1 = (msByte - 8) * step;
                     final int delta2 = (lsByte - 8) * step;
 
-                    final int X1 = delta1 + oldDelta2;
-                    final int X2 = delta2 + delta1;
+                    final int X1 = delta1 + oldDelta2 + mean;
+                    final int X2 = delta2 + delta1 + mean;
                     oldDelta2 = delta2;
 
                     decoded[decodedIndex++] = getLowByte(X1);
@@ -477,6 +505,8 @@ class userApplication {
              * @param decodedIndex The place to start decoding in the buffer.
              */
             void decode(final byte[] buffer, byte[] decoded, int decodedIndex);
+
+            void saveHistory(File filename) throws FileNotFoundException;
         }
     }
 }
