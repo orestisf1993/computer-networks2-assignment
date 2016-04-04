@@ -427,26 +427,24 @@ class userApplication {
         /**
          * {@code camera} defaults to {@code "FIX"}
          *
-         * @param filename
          * @param maxLength
          * @param flow
          * @throws IOException
-         * @see MainInstance#downloadImage(String, int, boolean, String)
+         * @see MainInstance#downloadImage(int, boolean, String)
          */
-        void downloadImage(final String filename, final int maxLength, final boolean flow) throws IOException {
-            downloadImage(filename, maxLength, flow, "FIX");
+        void downloadImage(final int maxLength, final boolean flow) throws IOException {
+            downloadImage(maxLength, flow, "FIX");
         }
 
         /**
          * Downloads an image and saves it at specified file.
          *
-         * @param filename  The name of the file where the image is saved.
          * @param maxLength The length of each UDP packet.
          * @param useFlow   {@code true} if ithaki's "FLOW" feature is to be used.
          * @param camera    Specifies which camera is to be used for the picture.
          * @throws IOException
          */
-        void downloadImage(final String filename, final int maxLength, final boolean useFlow, final String camera)
+        void downloadImage(final int maxLength, final boolean useFlow, final String camera)
                 throws IOException {
             final byte[] imageBuffer = new byte[maxLength];
             final DatagramPacket imagePacket = new DatagramPacket(imageBuffer, imageBuffer.length);
@@ -477,7 +475,7 @@ class userApplication {
                     }
                 }
                 final int packetLength = imagePacket.getLength();
-                logger.finest(filename + ": Received image packet of length:" + packetLength + ".");
+                logger.finest(imageCommand + ": Received image packet of length:" + packetLength + ".");
                 stream.write(imageBuffer, 0, packetLength);
                 if (packetLength < maxLength) {
                     break;
@@ -486,7 +484,7 @@ class userApplication {
                     simpleSend("NEXT");
                 }
             }
-            saveStreamToFile(stream, filename);
+            saveStreamToFile(stream, imageCommand + ".jpg");
         }
 
         void saveStreamToFile(final ByteArrayOutputStream stream, final String filename) throws IOException {
