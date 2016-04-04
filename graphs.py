@@ -12,7 +12,7 @@ import numpy as np
 from matplotlib.ticker import FuncFormatter
 
 DATE_FORMAT = matplotlib.dates.DateFormatter('%H:%M:%S')
-PLOT_PATH = os.path.join('report', 'plots', datetime.now().strftime(r'%Y-%m-%d'))
+PLOT_PATH = os.path.join('report', 'sessions', 'plots', datetime.now().strftime(r'%Y-%m-%d'))
 ECHO_PACKAGE_LENGTH_BYTES = 37
 
 
