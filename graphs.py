@@ -16,6 +16,24 @@ PLOT_PATH = os.path.join('report', 'plots', datetime.now().strftime(r'%Y-%m-%d')
 ECHO_PACKAGE_LENGTH_BYTES = 37
 
 
+def to_percent(y, position):
+    # Ignore the passed in position. This has the effect of scaling the default tick locations.
+    s = str(100 * y)
+
+    # The percent symbol needs escaping in latex
+    if matplotlib.rcParams['text.usetex'] is True:
+        return s + r'$\%$'
+    else:
+        return s + '%'
+
+
+def perc_weights(data):
+    return np.zeros_like(data) + 1 / data.size
+
+
+percent_formatter = FuncFormatter(to_percent)
+
+
 def read_codes(filename="codes.json"):
     with open(filename) as file_obj:
         logging.debug("Reading codes from file:%s.", filename)
@@ -91,22 +109,6 @@ def plot_code(code):
     plt.ylabel("Χρόνος Απόκρισης")
     plt_add_stats(mean, std)
     plt.savefig(filename=os.path.join(PLOT_PATH, '{code}-response-time.pdf'.format(code=code)), format='pdf')
-
-    def to_percent(y, position):
-        # Ignore the passed in position. This has the effect of scaling the default
-        # tick locations.
-        s = str(100 * y)
-
-        # The percent symbol needs escaping in latex
-        if matplotlib.rcParams['text.usetex'] is True:
-            return s + r'$\%$'
-        else:
-            return s + '%'
-
-    def perc_weights(data):
-        return (np.zeros_like(data) + 1 / data.size)
-
-    percent_formatter = FuncFormatter(to_percent)
 
     plt.figure()
     plt.hist(diffs, bins=10, weights=perc_weights(diffs), normed=False)
