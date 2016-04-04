@@ -279,7 +279,13 @@ class userApplication {
                     duration));
             while (timeEnd - timeStart < duration) {
                 server.send(packetSend);
-                client.receive(packetReceive);
+                boolean timeout = false;
+                try {
+                    client.receive(packetReceive);
+                } catch (final SocketTimeoutException exception) {
+                    logger.severe(exception.toString());
+                    timeout = true;
+                }
                 timeEnd = System.currentTimeMillis();
                 counter++;
                 history.append(timeEnd).append(":")
