@@ -9,6 +9,7 @@ from datetime import datetime
 import matplotlib.dates
 import matplotlib.pyplot as plt
 import numpy as np
+import scipy.stats
 from matplotlib.ticker import FuncFormatter
 
 DATE_FORMAT = matplotlib.dates.DateFormatter('%H:%M:%S')
@@ -111,17 +112,23 @@ def plot_code(code):
     plt.xlim(x[0] * 0.95, x[-1] * 1.01)
     plt.title("Χρόνος Απόκρισης για κάθε πακέτο ({code})".format(code=code))
     plt.xlabel("Αριθμός Πακέτου")
-    plt.ylabel("Χρόνος Απόκρισης")
+    plt.ylabel("Χρόνος Απόκρισης (ms)")
     plt_add_stats(mean, std)
     plt.savefig(filename=os.path.join(PLOT_PATH, '{code}-response-time.pdf'.format(code=code)), format='pdf')
 
-    figures.append(plt.figure())
-    plt.hist(diffs, bins=10, weights=perc_weights(diffs), normed=False)
-    plt.title("Συχνότητα ανά χρόνο απόκρισης")
-    plt.xlabel("Χρόνος Απόκρισης")
-    plt.ylabel("Συχνότητα")
-    plt.gca().yaxis.set_major_formatter(percent_formatter)
-    plt.savefig(filename=os.path.join(PLOT_PATH, '{code}-hist.pdf'.format(code=code)), format='pdf')
+    fig, ax = plt.subplots(1, 1)
+    figures.append(fig)
+    ax.hist(diffs, bins=10, weights=perc_weights(diffs), normed=False)
+    if not code.endswith("0000"):
+        # Plot normal distribution graph.
+        x = np.linspace(*ax.get_xlim())
+        rv = scipy.stats.norm(loc=mean, scale=std)
+        ax.plot(x, rv.pdf(x) * 100, lw=2)
+    ax.set_title("Συχνότητα χρόνου απόκρισης")
+    ax.set_xlabel("Χρόνος Απόκρισης (ms)")
+    ax.set_ylabel("Συχνότητα")
+    ax.yaxis.set_major_formatter(percent_formatter)
+    fig.savefig(filename=os.path.join(PLOT_PATH, '{code}-hist.pdf'.format(code=code)), format='pdf')
 
     # Histograms from throughput.
     for key, value in throughput.items():
