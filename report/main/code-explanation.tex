@@ -54,9 +54,23 @@ Linux 4.4.5-1-ARCH x86_64 GNU/Linux
 
 Καθώς δεν είναι δυνατό το ανέβασμα επιπλέον αρχείου με το όνομα \scriptname{} ο κώδικας παρατίθεται εδώ:
 \begin{code}
-\inputminted[frame=single, breaklines=true, linenos=true, python3=true]{python}{../extract-codes.py}
-\caption{Το script \scriptname{}}
-\label{listing:extract-codes}
+\inputminted[frame=single, breaklines=true, linenos=true, python3=true]{python}{../../extract-codes.py}
+\caption{Το script για την εξαγωγή των κωδικών}
+\end{code}
+
+\section{Script \plotscriptname{}}\label{section:plot-script}
+Για την επεξεργασία και απεικόνιση των δεδομένων που προκύπτουν μετά την εκτέλεση της εφαρμογής \appname{} γράφτηκε ένα script επίσης σε \href{https://www.python.org/}{python3}.
+Χρησιμοποιήθηκαν οι εξωτερικές βιβλιοθήκες:
+\begin{itemize}
+\item \href{http://www.numpy.org/}{numpy}
+\item \href{https://www.scipy.org/}{scipy}
+\item \href{http://matplotlib.org/}{matplotlib}
+\end{itemize}
+
+Καθώς δεν είναι δυνατό το ανέβασμα επιπλέον αρχείου με το όνομα \plotscriptname{} ο κώδικας παρατίθεται εδώ:
+\begin{code}
+\inputminted[frame=single, breaklines=true, linenos=true, python3=true]{python}{../../graphs.py}
+\caption{Το script για την απεικόνιση των δεδομένων}
 \end{code}
 
 \section{Χρήση βιβλιοθηκών \& imports}
