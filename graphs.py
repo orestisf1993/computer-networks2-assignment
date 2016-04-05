@@ -42,9 +42,9 @@ def read_codes(filename="codes.json"):
 
 def read_times(filename):
     with open(filename) as file_obj:
-        # start_time = int(file_obj.readline())
-        times = np.fromiter((tuple(map(int, line.split(":")))[0] for line in file_obj), dtype=int)
-    # return start_time, times
+        file_obj.readline()  # throw away start time.
+        lines = [line.split(":") for line in file_obj]
+    times = np.fromiter((int(line[0]) for line in lines if line[2] != 'true'), dtype=int)
     return times
 
 
