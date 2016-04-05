@@ -301,6 +301,13 @@ class userApplication {
             server.send(packet);
         }
 
+        /**
+         * Test the throughput of the server.
+         *
+         * @param duration          Duration to be tested. If it's bellow 4 minutes, a warning is printed.
+         * @param enableServerDelay Whether to enable or not the articial server delay (code EXXXX).
+         * @throws IOException
+         */
         void testThroughput(final long duration, final boolean enableServerDelay) throws IOException {
             if (duration < 4 * 60 * 1000) {
                 logger.warning("Throughput duration smaller than minimum expected for assignment.");
@@ -452,6 +459,13 @@ class userApplication {
             return decoded;
         }
 
+        /**
+         * Find a unique file based on it's filename and extension.
+         *
+         * @param baseFilename The original filename to be edited.
+         * @param extension    The original extension.
+         * @return A unique file.
+         */
         File getUniqueFile(final String baseFilename, final String extension) {
             int i = 1;
             String filename = baseFilename + "." + extension;
