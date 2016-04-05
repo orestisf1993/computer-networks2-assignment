@@ -50,7 +50,7 @@ def read_times(filename):
 
 
 def plt_add_stats(mean, std, unit="ms"):
-    plt.suptitle(r"$\mu$ =" + " {0:.1f} {unit}, $\sigma$ = {0:.2f} {unit}".format(mean, std, unit=unit))
+    plt.suptitle(r"$\mu$ = {0:.1f} {unit}, $\sigma$ = {0:.2f} {unit}".format(mean, std, unit=unit))
 
 
 def plt_save(filename, file_format='pdf'):
@@ -160,22 +160,27 @@ def plot_audio(code, texts, track_id=None, use_aq=False, n_packets=999, file_num
                 byte = file_obj.read(size_to_read)
         return np.array(res)
 
-    def plt_wavelength(data, start=None, end=None, size=10000):
+    def plt_wavelength(data, start=None, end=None, size=None, step=None):
         def restore_size_format(y, position):
             # Ignore the passed in position. This has the effect of scaling the default tick locations.
             return str(int(multiplier * y))
 
         step_formatter = FuncFormatter(restore_size_format)
 
-        data = data[start:end]
-        limit = data.size // size * size
-        data = np.reshape(data[:limit], (size, -1))
-        # Multiplier is the automatic dimension.
-        multiplier = data.shape[1]
-        data = np.average(data, axis=1)
+        formatter["mu"] = data.mean()
+        formatter["std"] = data.std()
+
+        data = data[start:end:step]
+        if size is not None:
+            limit = data.size // size * size
+            data = np.reshape(data[:limit], (size, -1))
+            # Multiplier is the automatic dimension.
+            multiplier = data.shape[1]
+            data = np.average(data, axis=1)
+            plt.gca().xaxis.set_major_formatter(step_formatter)
         figures.append(plt.figure())
-        plt.gca().xaxis.set_major_formatter(step_formatter)
         plt.plot(data)
+        plt.xlim([0, len(data)])
         plt.ylim([min(data), max(data)])
 
     def add_texts(plt_texts):
@@ -246,16 +251,19 @@ matplotlib.rc('font', family='Ubuntu')
 
 os.makedirs(PLOT_PATH, exist_ok=True)
 codes = read_codes()
+SUPTITLE_FORMAT = r"$\mu$={mu:.2f}, $\sigma$={std:.2f}"
 texts_dpcm = {
     'buffer': {
         'title': "Κυματομορφή από την Ithaki: {track_info} ({code})",
         'xlabel': "Αριθμός δείγματος",
-        'ylabel': "Τιμή"
+        'ylabel': "Τιμή",
+        'suptitle': SUPTITLE_FORMAT
     },
     'decoded': {
         'title': "Αποκωδικοποιημένη κυματομορφή: {track_info} ({code})",
         'xlabel': "Αριθμός δείγματος",
-        'ylabel': "Τιμή"
+        'ylabel': "Τιμή",
+        'suptitle': SUPTITLE_FORMAT
     },
     'decoded-hist': {
         'title': "Κατανομή διαφορών δειγμάτων: {track_info} ({code})",
