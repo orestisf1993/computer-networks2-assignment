@@ -246,8 +246,6 @@ matplotlib.rc('font', family='Ubuntu')
 
 os.makedirs(PLOT_PATH, exist_ok=True)
 codes = read_codes()
-plot_code('E0000')
-plot_code(codes['echoRequestCode'])
 texts_dpcm = {
     'buffer': {
         'title': "Κυματομορφή από την Ithaki: {track_info} ({code})",
@@ -275,6 +273,9 @@ texts_dpcm = {
         'ylabel': r"Τιμή $\beta$"
     }
 }
+
+plot_code('E0000')
+plot_code(codes['echoRequestCode'])
 plot_audio(codes['soundRequestCode'], track_id=10, use_aq=False, texts=texts_dpcm)
 plot_audio(codes['soundRequestCode'], track_id=23, use_aq=True, texts=texts_dpcm)
 plot_audio(codes['soundRequestCode'], track_id=23, use_aq=True, texts=texts_dpcm)
