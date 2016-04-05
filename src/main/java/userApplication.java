@@ -17,6 +17,7 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Scanner;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -237,16 +238,54 @@ class userApplication {
         void run(final String[] args) throws IOException, LineUnavailableException {
             logger.info("Starting execution.");
 
-            logger.info("Starting image downloads.");
-            downloadImage("test2.jpg", 512, false, "PTZ");
-            downloadImage("test3.jpg", 1024, true);
+            testThroughput(1000 * 60 * 4, false);
+            testThroughput(1000 * 60 * 4, true);
 
-            logger.info("Starting downloadSound().");
-            final byte[] audio = downloadSound(50, 1, true);
-            playMusic(audio, 16);
-            playMusic(downloadRandomSound(100, false), 8);
-            testThroughput(1000 * 60 / 10, false);
-            testThroughput(1000 * 60 / 10, true);
+            downloadImage(512, true, "FIX");
+            downloadImage(1024, false, "PTZ");
+
+            byte[] audio;
+            audio = downloadSound(999, 10, false);
+            if (askPlayMusic()) {
+                playMusic(audio, 8);
+            }
+            audio = downloadSound(999, 23, true);
+            if (askPlayMusic()) {
+                playMusic(audio, 16);
+            }
+            audio = downloadRandomSound(999, true);
+            if (askPlayMusic()) {
+                playMusic(audio, 16);
+            }
+            audio = downloadRandomSound(999, true);
+            if (askPlayMusic()) {
+                playMusic(audio, 16);
+            }
+
+            logger.info("Finished execution.");
+        }
+
+        /**
+         * Ask the user if resulting music is to be played.
+         *
+         * @return {@code true} if user answers "y". Else, {@code false}.
+         */
+        boolean askPlayMusic() {
+            String answer;
+            System.out.println("Play music? [Y]/n");
+            Scanner in = new Scanner(System.in);
+            while (true) {
+                answer = in.nextLine().trim().toLowerCase();
+                if (answer.equals("y") || answer.equals("")) {
+                    in.close();
+                    return true;
+                } else if (answer.equals("n")) {
+                    in.close();
+                    return false;
+                } else {
+                    System.out.println("Please answer [Y]/n");
+                }
+            }
         }
 
         /**
@@ -444,8 +483,7 @@ class userApplication {
          * @param camera    Specifies which camera is to be used for the picture.
          * @throws IOException
          */
-        void downloadImage(final int maxLength, final boolean useFlow, final String camera)
-                throws IOException {
+        void downloadImage(final int maxLength, final boolean useFlow, final String camera) throws IOException {
             final byte[] imageBuffer = new byte[maxLength];
             final DatagramPacket imagePacket = new DatagramPacket(imageBuffer, imageBuffer.length);
             final String imageCommand = imageRequestCode + (useFlow ? "FLOW=ON" : "") + "UDP=" + maxLength + "CAM=" +
