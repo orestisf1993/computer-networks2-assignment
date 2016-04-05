@@ -1,4 +1,5 @@
 \newcommand{\codeRef}[2][]{\hyperref[section:#2]{\mintinline{java}!#2#1!}}
+\newcommand{\myinput}[3]{\inputminted[frame=single, breaklines=true, linenos=true, firstline=#1, lastline=#2, gobble=#3]{java}{../../src/main/java/userApplication.java}}
 \chapter{Η εφαρμογή (\appname{})}
 \section{Ρυθμίσεις router}
 \begin{figure}[htb]
@@ -75,33 +76,13 @@ Linux 4.4.5-1-ARCH x86_64 GNU/Linux
 
 \section{Χρήση βιβλιοθηκών \& imports}
 \begin{code}
-\begin{minted}{java}
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.stream.JsonReader;
-
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.SourceDataLine;
-import java.io.*;
-import java.net.*;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.Arrays;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import static javax.xml.bind.DatatypeConverter.printHexBinary;
-\end{minted}
+\myinput{5}{24}{0}
 \caption{Imports στο \appname}
 \end{code}
 
 Χρησιμοποιήθηκαν οι εξής βιβλιοθήκες:
 \begin{itemize}
-\item
+\item \label{lib:Gson}
 \href{https://github.com/google/gson}{\mintinline{java}!com.google.gson.Gson!}:
 \begin{displayquote}
 Gson is a Java library that can be used to convert Java Objects into their JSON representation. It can also be used to convert a JSON string to an equivalent Java object.
@@ -117,7 +98,7 @@ Gson is a Java library that can be used to convert Java Objects into their JSON 
     </dependency>
 </dependencies>
 \end{minted}
-Χρησιμοποιείται αποκλειστικά στη μέθοδο \codeRef{initVariables}.
+Χρησιμοποιείται αποκλειστικά στη μέθοδο \codeRef[()]{initVariables}.
 
 \item
 \href{https://docs.oracle.com/javase/8/docs/api/javax/sound/sampled/package-summary.html}{\mintinline{java}!javax.sound.sampled!}:
@@ -125,7 +106,7 @@ Gson is a Java library that can be used to convert Java Objects into their JSON 
 Provides interfaces and classes for capture, processing, and playback of sampled audio data.
 \end{displayquote}
 Για την αναπαραγωγή ήχου που λαμβάνεται σε μορφή \mintinline{java}!byte[]! (array).
-Χρησιμοποιείται στην μέθοδο \codeRef{playMusic}.
+Χρησιμοποιείται στην μέθοδο \codeRef[()]{playMusic}.
 
 \item
 \href{https://docs.oracle.com/javase/8/docs/api/java/io/package-summary.html}{\mintinline{java}!java.io.*!}:
@@ -160,7 +141,7 @@ Contains the collections framework, legacy collection classes, event model, date
 \mintinline{java}!java.util.logging! και \mintinline{java}!java.util.Arrays!.
 \end{itemize}
 
-\section{Η \mintinline{java}!class userApplication!}
+\section{Η κλάση \texttt{userApplication}}
 \begin{code}
 \begin{minted}{java}
 /**
@@ -193,5 +174,5 @@ class userApplication {
 Ρόλος της είναι:
 \begin{itemize}
 \item Η αρχικοποίηση ενός αντικειμένου \mintinline{java}!Logger logger! που βοηθάει στο debugging και την εκτύπωση μηνυμάτων.
-\item Η κλήση της \mintinline{java}!public static void main()! που αρχικοποιεί ένα αντικείμενο της βασικής κλάσης \codeRef{MainInstance}.
+\item Η κλήση της \mintinline{java}!public static void main()! που αρχικοποιεί ένα αντικείμενο της βασικής κλάσης \codeRef[()]{MainInstance}.
 \end{itemize}
