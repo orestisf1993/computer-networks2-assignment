@@ -204,7 +204,7 @@ def plot_audio(code, texts, track_id=None, use_aq=False, n_packets=999, file_num
     assert (track_id is not None) != random_track
     formatter = {
         'code': code,
-        'track_id': ("L" + str(track_id)) * (not random_track),
+        'track_id': ("L" + str(track_id).zfill(2)) * (not random_track),
         'aq_code': "AQ" * use_aq,
         'n_packets': n_packets,
         'date': "!#TODO#!",
