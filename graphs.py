@@ -203,6 +203,7 @@ def plot_audio(code, texts, track_id=None, use_aq=False, n_packets=999, file_num
         for metric, y in stats.items():
             figures.append(plt.figure())
             plt.scatter(np.arange(len(y)), y)
+            plt.xlim([0, len(y)])
             add_texts(texts[metric])
             plt_save(base_filename + "-" + metric)
 
