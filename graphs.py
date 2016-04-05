@@ -48,10 +48,8 @@ def read_times(filename):
     return times
 
 
-def plt_add_stats(mean, std):
-    plt.suptitle(r"$\mu$ =" + " {0:.1f} ms".format(mean) +
-                 r", $\sigma$ = " +
-                 "{0:.2f} ms".format(std))
+def plt_add_stats(mean, std, unit="ms"):
+    plt.suptitle(r"$\mu$ =" + " {0:.1f} {unit}, $\sigma$ = {0:.2f} {unit}".format(mean, std, unit=unit))
 
 
 def plt_save(filename, file_format='pdf'):
@@ -97,7 +95,7 @@ def plot_code(code):
         ax.yaxis.grid(True)
         plt.gcf().autofmt_xdate()
         plt.title("Ρυθμαπόδοση ανά {limit} seconds ({code})".format(code=code, limit=limit))
-        plt_add_stats(mean, std)
+        plt_add_stats(mean, std, unit="bps")
         plt.xlabel("Χρόνος Άφιξης")
         plt.ylabel("Ρυθμός (bps)")
         plt.savefig(filename=os.path.join(PLOT_PATH, '{code}-lim{lim}.pdf'.format(code=code, lim=limit)), format='pdf')
