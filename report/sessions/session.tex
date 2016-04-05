@@ -1,0 +1,33 @@
+\input{../preamble-ext}
+
+\ifdefined\isfirstsession
+\input{settings1}
+\else
+\input{settings2}
+\fi
+
+\title{%
+  \vspace{0.3cm}%
+  \hrule height 2pt%
+  \vspace{0.3cm} Δίκτυα Υπολογιστών ΙΙ\\
+  \Sessionnumber{} Σύνοδος%
+  \vspace{0.3cm}%
+  \hrule height 2pt%
+  \vspace{0.3cm}
+}
+
+\begin{document}
+\pagenumbering{roman}
+\deactivateBG
+\maketitle
+\tableofcontents
+\listoffigures
+\clearpage % Ensure background starts after this.
+\activateBG
+\pagenumbering{arabic}
+\setcounter{page}{1}
+\input{session-intro}
+\input{session-echox}
+\input{session-echo0}
+
+\end{document}
