@@ -300,3 +300,6 @@ report.pdf
 # Temporary data
 .ipynb_checkpoints/
 
+
+*.data
+*.txt
