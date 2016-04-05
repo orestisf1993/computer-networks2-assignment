@@ -1,0 +1,23 @@
+\section{Echo χωρίς καθυστέρηση}
+Σύμφωνα με τα απαιτούμενα της εργασίας, πραγματοποιήθηκε για χρονική διάρκεια 4 λεπτών καταμέτρηση του χρόνου απόκρισης του συστήματος σε milliseconds για κάθε πακέτο \texttt{echo}, με απενεργοποιημένη την καθυστέρηση που παρεμβάλει ο server.
+Ο κωδικός που χρησιμοποιήθηκε είναι ο \echozcode{}.
+
+Αναφέρονται τα εξής στοιχεία:
+\begin{itemize}
+\item Στην διάρκεια των 4 αυτών λεπτών εστάλησαν \echozsend{} πακέτα \texttt{echo} και ελήφθησαν \echozreceive{} πακέτα.
+\item Ο μέγιστος χρόνος καθυστέρησης απόκρισης ενός πακέτου ήταν \maxechozms{} ενώ ο ελάχιστος \minechozms{}.
+\item Ο μέσος χρόνος καθυστέρησης ενός πακέτου ήταν \meanechozms{}.
+\item Η διασπορά ήταν \varechozms{}, ενώ η τυπική απόκλιση ήταν \stdechozms{}.
+\end{itemize}
+
+Το διάγραμμα χρόνου απόκρισης φαίνεται στο \imageref{\plotzresponsetime\plotzhist}.
+Τα διαγράμματα ρυθμαπόδοσης φαίνονται στα σχήματα
+\ref{fig:\plotzlimA\plotzlimAh},
+\ref{fig:\plotzlimB\plotzlimBh}
+και \ref{fig:\plotzlimC\plotzlimCh}.
+
+\dplothere{\plotzresponsetime}{\plotzhist}{Χρόνος απόκρισης \echozcode}
+\dplothere{\plotzlimA}{\plotzlimAh}{Ρυθμαπόδοση ανά 8 seconds \echozcode}
+\dplothere{\plotzlimB}{\plotzlimBh}{Ρυθμαπόδοση ανά 16 seconds \echozcode}
+\dplothere{\plotzlimC}{\plotzlimCh}{Ρυθμαπόδοση ανά 32 seconds \echozcode}
+\FloatBarrier
