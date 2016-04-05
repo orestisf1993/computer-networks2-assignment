@@ -1,0 +1,60 @@
+%- wave: song & random (2)
+%- dpcm διαφορες & δειγματα (2) + κατανομες (2) :10
+%- aq διαφορες & δειγματα (2) + κατανομες (2) :23
+%- 2 aq: ακολουθίες mu & beta (4) :5 + 23
+\section{Αρχεία ήχου}
+\subsection{Κυματομορφές}
+    \subsubsection{Κομμάτι από την εικονική γεννήτρια συχνοτήτων}
+    Με τον κωδικό \Rcode{} λάβαμε την κυματομορφή που φαίνεται στο
+    \plotandref{\Rbuffer}{\Rcode{}: Κυματομορφή από την εικονική γεννήτρια συχνοτήτων}.
+    Επίσης, παρουσιάζονται:
+    \begin{itemize}
+    \item \dplotandref{\Rdecoded}{\Rhist}{\Rcode{}: Αποκωδικοποιημένη κυματομορφή}:
+    Η αποκωδικοποιημένη κυματομορφή.
+    \item \dplotandref{\Rddecoded}{\Rdhist}{\Rcode{}: Διαφορές αποκωδικοποιημένης κυματομορφής}:
+    Οι διαφορές της αποκωδικοποιημένης κυματομορφής.
+    \item \dplotandref{\Rmean}{\Rstep}{\Rcode{}: Εξέλιξη $\mu$ και $\beta$}:
+    Η εξέλιξη του μέσου όρου και του βήματος, σύμφωνα με τις πληροφορίες που λήφθηκαν από την Ιθάκη.
+    \end{itemize}
+    \FloatBarrier
+    \subsubsection{Κομμάτι από το πειραματικό ρεπερτόριο μουσικής}
+    Για το τραγούδι 10 (\href{https://www.youtube.com/watch?v=raK2GNAFhJY}{Tanto Project - Perfect Colour})
+    λάβαμε την κυματομορφή που φαίνεται στο \plotandref{\Dbuffer}{\Dcode{}: Κυματομορφή από το πειραματικό ρεπερτόριο μουσικής}.
+    Περισσότερες πληροφορίες στα \ref{sub:dpcm}, \ref{sub:aq} και \ref{sub:aq-m-b}.
+\subsection{DPCM}\label{sub:dpcm}
+    Για το τραγούδι 10 (\href{https://www.youtube.com/watch?v=raK2GNAFhJY}{Tanto Project - Perfect Colour}) το οποίο λήφθηκε μέσω του κωδικού \Dcode{} παρουσιάζονται:
+    \begin{itemize}
+    \item \dplotandref{\Ddecoded}{\Dhist}{\Dcode{}: Αποκωδικοποιημένη κυματομορφή}:
+    Η αποκωδικοποιημένη κυματομορφή.
+    \item \dplotandref{\Dddecoded}{\Ddhist}{\Dcode{}: Διαφορές αποκωδικοποιημένης κυματομορφής}:
+    Οι διαφορές της αποκωδικοποιημένης κυματομορφής.
+    \end{itemize}
+
+    Παρατηρούμε ότι η κυματομορφή του κομματιού έχει μικρές διαφορές στην αρχή, άλλα μεγαλύτερες όταν αρχίζει το εντονότερο μέρος του τραγουδιού.
+    Επίσης, η επαναληπτική φύση του τραγουδιού ("beatακι") μπορεί να παρατηρηθεί και στην περιοδικότητα της κυματομορφής.
+\FloatBarrier
+\subsection{AQ-DPCM}\label{sub:aq}
+    Για το τραγούδι 23 (\href{https://www.youtube.com/watch?v=tuXOTlYOSEA}{Residence Deejays - Sexy Love}) το οποίο λήφθηκε μέσω του κωδικού \Acode{} παρουσιάζονται:
+    \begin{itemize}
+    \item \dplotandref{\Adecoded}{\Ahist}{\Acode{}: Αποκωδικοποιημένη κυματομορφή}:
+    Η αποκωδικοποιημένη κυματομορφή.
+    \item \dplotandref{\Addecoded}{\Adhist}{\Acode{}: Διαφορές αποκωδικοποιημένης κυματομορφής}:
+    Οι διαφορές της αποκωδικοποιημένης κυματομορφής.
+    \end{itemize}
+
+    Παρατηρούμε ότι το ύψος της κυματομορφής είναι σχετικά σταθερό, καθώς το τραγούδι είναι ήδη σε αρκετά έντονο μέρος (αρχίζει από την μέση, όχι από την αρχή).
+    Γενικά, δεν παρατηρείται κάποια περιοδικότητα.
+    Αυτό μπορεί να οφείλεται στην ύπαρξη φωνητικών στο τραγούδι.
+\subsection[AQ-DPCM: εξέλιξη \emph{μ} και \emph{β}]{AQ-DPCM: εξέλιξη $\mu$ και $\beta$}\label{sub:aq-m-b}
+    \begin{itemize}
+    \item Για το τραγούδι 5 (\href{https://www.youtube.com/watch?v=YPwtJ89jes4}{Kylie Minogue - Can't Get You Out Of My Head})
+    το οποίο λήφθηκε μέσω του κωδικού \Acode{}
+    η εξέλιξη των $\mu$ και $\beta$ φαίνεται στο
+    \dplotandref{\Ameansecond}{\Astepsecond}{\Acode{}: Εξέλιξη $\mu$ και $\beta$}.
+    \item Για το τραγούδι 23 (\href{https://www.youtube.com/watch?v=tuXOTlYOSEA}{Residence Deejays - Sexy Love})
+    το οποίο λήφθηκε μέσω του κωδικού \Acodesecond{}
+    η εξέλιξη των $\mu$ και $\beta$ φαίνεται στο
+    \dplotandref{\Amean}{\Astep}{\Acodesecond{}: Εξέλιξη $\mu$ και $\beta$}.
+    \end{itemize}
+
+\FloatBarrier
