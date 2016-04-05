@@ -225,6 +225,7 @@ def plot_audio(code, texts, track_id=None, use_aq=False, n_packets=999, file_num
     figures = []
 
     decoded = open_audio_bytes(base_filename + 'decoded{file_number}.data'.format(**formatter))
+    decoded_diff = np.diff(decoded)
     buffer = open_audio_bytes(base_filename + 'buffer{file_number}.data'.format(**formatter))
 
     plt_wavelength(buffer, size=10000)
@@ -235,9 +236,17 @@ def plot_audio(code, texts, track_id=None, use_aq=False, n_packets=999, file_num
     add_texts(texts['decoded'])
     plt_save(base_filename + '-decoded{file_number}'.format(**formatter))
 
+    plt_wavelength(decoded_diff, size=None, step=50)
+    add_texts(texts['decoded-diff'])
+    plt_save(base_filename + '-decoded-diff{file_number}'.format(**formatter))
+
     plt_hist(decoded)
     add_texts(texts['decoded-hist'])
     plt_save(base_filename + '-decoded-hist{file_number}'.format(**formatter))
+
+    plt_hist(decoded_diff)
+    add_texts(texts['decoded-diff-hist'])
+    plt_save(base_filename + '-decoded-diff-hist{file_number}'.format(**formatter))
 
     if use_aq:
         plot_aq_stats()
@@ -267,6 +276,17 @@ texts_dpcm = {
         'suptitle': SUPTITLE_FORMAT
     },
     'decoded-hist': {
+        'title': "Κατανομή δειγμάτων: {track_info} ({code})",
+        'xlabel': "Τιμή",
+        'ylabel': "Συχνότητα"
+    },
+    'decoded-diff': {
+        'title': "Διαφορές αποκωδικοποιημένης κυματομορφής: {track_info} ({code})",
+        'xlabel': "Αριθμός δείγματος",
+        'ylabel': "Τιμή",
+        'suptitle': SUPTITLE_FORMAT
+    },
+    'decoded-diff-hist': {
         'title': "Κατανομή διαφορών δειγμάτων: {track_info} ({code})",
         'xlabel': "Τιμή",
         'ylabel': "Συχνότητα"
@@ -287,6 +307,5 @@ plot_code('E0000')
 plot_code(codes['echoRequestCode'])
 plot_audio(codes['soundRequestCode'], track_id=10, use_aq=False, texts=texts_dpcm)
 plot_audio(codes['soundRequestCode'], track_id=23, use_aq=True, texts=texts_dpcm)
-plot_audio(codes['soundRequestCode'], track_id=23, use_aq=True, texts=texts_dpcm)
+plot_audio(codes['soundRequestCode'], track_id=5, use_aq=True, texts=texts_dpcm)
 plot_audio(codes['soundRequestCode'], use_aq=True, random_track=True, texts=texts_dpcm)
-plot_audio(codes['soundRequestCode'], use_aq=True, random_track=True, texts=texts_dpcm, file_number=1)

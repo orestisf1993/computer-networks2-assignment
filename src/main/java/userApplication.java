@@ -253,7 +253,7 @@ class userApplication {
             if (askPlayMusic()) {
                 playMusic(audio, 16);
             }
-            audio = downloadRandomSound(999, true);
+            audio = downloadSound(999, 5, true);
             if (askPlayMusic()) {
                 playMusic(audio, 16);
             }
