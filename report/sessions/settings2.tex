@@ -1,0 +1,124 @@
+% Plots folder
+\newcommand{\plotfolder}{plots/2016-04-08}
+
+% Some "actual" commands.
+\newcommand{\plothere}[2]{%
+\begin{figure}[htb]%
+\centering%
+\includegraphics[keepaspectratio, width=1.0\linewidth]{\plotfolder/#1}%
+\caption{#2}
+\label{fig:#1}%
+\end{figure}%
+}
+\newcommand{\dplothere}[3]{%
+\begin{figure}[htb]
+\centering
+\begin{subfigure}{\linewidth}
+\centering
+    \includegraphics[height=0.48\textheight]{\plotfolder/#1}
+\end{subfigure}
+\par\bigskip % force a bit of vertical whitespace
+\begin{subfigure}{\linewidth}
+\centering
+    \includegraphics[height=0.48\textheight]{\plotfolder/#2}
+\end{subfigure}
+\caption{#3}
+\label{fig:#1#2}%
+\end{figure}
+}
+\newcommand{\plotandref}[2]{\imageref{#1}\plothere{#1}{#2}}
+\newcommand{\dplotandref}[3]{\imageref{#1#2}\dplothere{#1}{#2}{#3}}
+
+\newcommand{\sessionnumber}{δεύτερη}
+\newcommand{\Sessionnumber}{Δεύτερη}
+\newcommand{\sessiondatestart}{7 Απριλίου 2016 11:52:37 μμ}
+%\newcommand{\sessiondateend}{TODO}
+% Codes from codes.json.
+\newcommand{\echocode}{E7430}
+
+\newcommand{\clientaddress}{\texttt{94.67.111.202}}
+\newcommand{\clientlisteningport}{\texttt{48022}}
+\newcommand{\serverlisteningport}{\texttt{38022}}
+\newcommand{\echorequestcode}{\texttt{\echocode}}
+\newcommand{\imagerequestcode}{\texttt{M8320}}
+\newcommand{\soundrequestcode}{\texttt{V0820}}
+\newcommand{\echozcode}{\texttt{E0000}}
+
+% echoxxxx section.
+\usepackage{siunitx}
+\newcommand{\echoxsend}{172}
+\newcommand{\echoxreceive}{172}
+\newcommand{\maxechoxms}{\SI{1929}{\ms}}
+\newcommand{\minechoxms}{\SI{847}{\ms}}
+\newcommand{\meanechoxms}{\SI{1397.00}{\ms}}
+\newcommand{\varechoxms}{\SI{74260.74}{\ms^2}}
+\newcommand{\stdechoxms}{\SI{272.50}{\ms}}
+% plots
+\newcommand{\plotxresponsetime}{\echocode-response-time}
+\newcommand{\plotxhist}{\echocode-hist}
+\newcommand{\plotxlimA}{\echocode-lim8}
+\newcommand{\plotxlimAh}{\echocode-lim8-hist}
+\newcommand{\plotxlimB}{\echocode-lim16}
+\newcommand{\plotxlimBh}{\echocode-lim16-hist}
+\newcommand{\plotxlimC}{\echocode-lim32}
+\newcommand{\plotxlimCh}{\echocode-lim32-hist}
+
+% echo0000 section
+\newcommand{\echozsend}{4450}
+\newcommand{\echozreceive}{4449}
+\newcommand{\maxechozms}{\SI{586}{\ms}}
+\newcommand{\minechozms}{\SI{41}{\ms}}
+\newcommand{\meanechozms}{\SI{53.93}{\ms}}
+\newcommand{\varechozms}{\SI{25503.32}{\ms^2}}
+\newcommand{\stdechozms}{\SI{159.69}{\ms}}
+% plots
+\newcommand{\plotzresponsetime}{E0000-response-time}
+\newcommand{\plotzhist}{E0000-hist}
+\newcommand{\plotzlimA}{E0000-lim8}
+\newcommand{\plotzlimAh}{E0000-lim8-hist}
+\newcommand{\plotzlimB}{E0000-lim16}
+\newcommand{\plotzlimBh}{E0000-lim16-hist}
+\newcommand{\plotzlimC}{E0000-lim32}
+\newcommand{\plotzlimCh}{E0000-lim32-hist}
+
+% audio section
+% songs
+% DPCM
+\newcommand{\dpcmsong}{V0820L10F999}
+\newcommand{\Dcode}{\texttt{\dpcmsong}}
+\newcommand{\Dbuffer}{\dpcmsong-buffer}
+\newcommand{\Ddecoded}{\dpcmsong-decoded}
+\newcommand{\Dhist}{\dpcmsong-decoded-hist}
+\newcommand{\Dddecoded}{\dpcmsong-decoded-diff}
+\newcommand{\Ddhist}{\dpcmsong-decoded-diff-hist}
+% AQ
+\newcommand{\aqsong}{V0820L23AQF999}
+\newcommand{\Acode}{\texttt{\aqsong}}
+\newcommand{\Abuffer}{\aqsong-buffer}
+\newcommand{\Adecoded}{\aqsong-decoded}
+\newcommand{\Ahist}{\aqsong-decoded-hist}
+\newcommand{\Addecoded}{\aqsong-decoded-diff}
+\newcommand{\Adhist}{\aqsong-decoded-diff-hist}
+\newcommand{\Amean}{\aqsong-mean}
+\newcommand{\Astep}{\aqsong-step}
+% Second aq song
+\newcommand{\aqsongsecond}{V0820L05AQF999}
+\newcommand{\Acodesecond}{\texttt{\aqsongsecond}}
+\newcommand{\Ameansecond}{\aqsongsecond-mean}
+\newcommand{\Astepsecond}{\aqsongsecond-step}
+% random
+\newcommand{\aqrandom}{V0820AQT999}
+\newcommand{\Rcode}{\texttt{\aqrandom}}
+\newcommand{\Rbuffer}{\aqrandom-buffer}
+\newcommand{\Rdecoded}{\aqrandom-decoded}
+\newcommand{\Rhist}{\aqrandom-decoded-hist}
+\newcommand{\Rddecoded}{\aqrandom-decoded-diff}
+\newcommand{\Rdhist}{\aqrandom-decoded-diff-hist}
+\newcommand{\Rmean}{\aqrandom-mean}
+\newcommand{\Rstep}{\aqrandom-step}
+
+% Images
+\newcommand{\imagecodefirst}{M8320FLOW=ONUDP=512CAM=FIX}
+\newcommand{\imagecodesecond}{M8320UDP=1024CAM=PTZ}
+\newcommand{\IcodeA}{\texttt{\imagecodefirst}}
+\newcommand{\IcodeB}{\texttt{\imagecodesecond}}
